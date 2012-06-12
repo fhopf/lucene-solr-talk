@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -36,8 +37,8 @@ public class IndexerTest {
 
     @Test
     public void twoTalksAreIndexed() throws IOException {
-        Talk talk1 = new Talk("/path/to/talk1", "Title 1", "Author 1", new Date(), "Contents");
-        Talk talk2 = new Talk("/path/to/talk2", "Title 2", "Author 2", new Date(), "More Contents");
+        Talk talk1 = new Talk("/path/to/talk1", "Title 1", Arrays.asList("Author 1"), new Date(), "Contents", new ArrayList<String>());
+        Talk talk2 = new Talk("/path/to/talk2", "Title 2", Arrays.asList("Author 2"), new Date(), "More Contents", new ArrayList<String>());
 
         indexer.index(talk1, talk2);
         assertDocumentCount(2);
@@ -58,6 +59,7 @@ public class IndexerTest {
         lines.add("title=Test");
         lines.add("content=Content");
         lines.add("date=12.06.2012");
+        lines.add("categories=Test1,Test2");
         Files.write(file, lines, Charset.forName("ISO-8859-1"));
 
         indexer.indexDirectory(dir.toAbsolutePath().toString());

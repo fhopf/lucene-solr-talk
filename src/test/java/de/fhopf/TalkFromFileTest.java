@@ -31,7 +31,7 @@ public class TalkFromFileTest {
     @Test
     public void valuesAreSet() throws ParseException {
         Talk talk = talkFromFile.apply(new File(path));
-        assertEquals("Florian Hopf", talk.speaker);
+        assertEquals("Florian Hopf", talk.speakers.get(0));
         assertEquals("Titel", talk.title);
         assertEquals(path, talk.path);
         assertEquals("Inhalt", talk.content);

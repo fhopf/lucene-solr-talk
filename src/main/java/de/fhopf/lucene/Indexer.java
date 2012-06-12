@@ -71,10 +71,16 @@ public class Indexer {
 
     private Document asDocument(Talk talk) {
         Document doc = new Document();
-        doc.add(new Field("author", talk.speaker, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS));
+        for (String speaker: talk.speakers) {
+            doc.add(new Field("speaker", speaker, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS));
+        }
         doc.add(new Field("title", talk.title, Field.Store.YES, Field.Index.ANALYZED));
         doc.add(new Field("path", talk.path, Field.Store.YES, Field.Index.NO));
         doc.add(new Field("content", talk.content, Field.Store.NO, Field.Index.ANALYZED));
+        for (String category: talk.categories) {
+            doc.add(new Field("category", category, Field.Store.YES, Field.Index.NOT_ANALYZED));
+        }
+
         return doc;
     }
 

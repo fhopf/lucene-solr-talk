@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -21,12 +23,16 @@ public class TalkFromFile implements Function<File, Talk> {
     @Override
     public Talk apply(File input) {
         Properties props = read(input);
-        String author = props.getProperty("speaker");
+        String speakerValue = props.getProperty("speaker");
         String title = props.getProperty("title");
         String dateValue = props.getProperty("date");
         String contents = props.getProperty("content");
+        String categoriesValue = props.getProperty("categories");
 
-        return new Talk(input.getAbsolutePath(), title, author, parseDate(dateValue), contents);
+        List<String> speakers = Arrays.asList(speakerValue.split(","));
+        List<String> categories = Arrays.asList(categoriesValue.split(","));
+
+        return new Talk(input.getAbsolutePath(), title, speakers, parseDate(dateValue), contents, categories);
     }
 
     private Date parseDate(String dateValue) {
