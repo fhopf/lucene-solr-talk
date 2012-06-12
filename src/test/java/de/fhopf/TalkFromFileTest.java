@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,8 +30,8 @@ public class TalkFromFileTest {
 
     @Test
     public void valuesAreSet() throws ParseException {
-        Talk talk = talkFromFile.apply(path);
-        assertEquals("Florian Hopf", talk.author);
+        Talk talk = talkFromFile.apply(new File(path));
+        assertEquals("Florian Hopf", talk.speaker);
         assertEquals("Titel", talk.title);
         assertEquals(path, talk.path);
         assertEquals("Inhalt", talk.content);

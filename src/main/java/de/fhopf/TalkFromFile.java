@@ -14,19 +14,19 @@ import java.util.Properties;
 /**
  * Function that reads a talk from a properties file.
  */
-public class TalkFromFile implements Function<String, Talk> {
+public class TalkFromFile implements Function<File, Talk> {
 
     private DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
-    public Talk apply(String input) {
+    public Talk apply(File input) {
         Properties props = read(input);
-        String author = props.getProperty("author");
+        String author = props.getProperty("speaker");
         String title = props.getProperty("title");
         String dateValue = props.getProperty("date");
         String contents = props.getProperty("content");
 
-        return new Talk(input, title, author, parseDate(dateValue), contents);
+        return new Talk(input.getAbsolutePath(), title, author, parseDate(dateValue), contents);
     }
 
     private Date parseDate(String dateValue) {
@@ -37,11 +37,11 @@ public class TalkFromFile implements Function<String, Talk> {
         }
     }
 
-    private Properties read(String input) {
+    private Properties read(File input) {
         Properties props = new Properties();
         FileInputStream in = null;
         try {
-            in = new FileInputStream(new File(input));
+            in = new FileInputStream(input);
             props.load(in);
         } catch (IOException e) {
             throw new IllegalStateException(e);
