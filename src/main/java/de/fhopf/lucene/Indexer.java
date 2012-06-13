@@ -4,6 +4,7 @@ import com.google.common.collect.Collections2;
 import de.fhopf.Talk;
 import de.fhopf.TalkFromFile;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
+import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
@@ -80,8 +81,27 @@ public class Indexer {
         for (String category: talk.categories) {
             doc.add(new Field("category", category, Field.Store.YES, Field.Index.NOT_ANALYZED));
         }
+        doc.add(new Field("date", DateTools.timeToString(talk.date.getTime(), DateTools.Resolution.DAY), Field.Store.YES, Field.Index.NOT_ANALYZED));
+
+        String all = extractAllText(talk);
+        doc.add(new Field("all", all, Field.Store.NO, Field.Index.ANALYZED));
 
         return doc;
+    }
+
+    private String extractAllText(Talk talk) {
+        StringBuilder allText = new StringBuilder(talk.title);
+        for (String category: talk.categories) {
+            allText.append(" ");
+            allText.append(category);
+        }
+        for (String speaker: talk.speakers) {
+            allText.append(" ");
+            allText.append(speaker);
+        }
+        allText.append(" ");
+        allText.append(talk.content);
+        return allText.toString();
     }
 
     public static void main(String [] args) throws IOException {
