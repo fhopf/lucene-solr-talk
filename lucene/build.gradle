@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'maven'
 
 repositories {
     mavenCentral()
@@ -16,4 +17,12 @@ dependencies {
 
  jar {
     from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+configure(install.repositories.mavenInstaller) {
+    pom.project {
+        version '1.0-SNAPSHOT'
+        artifactId 'lucene'
+	groupId 'de.fhopf.lucene'
+    }
 }
