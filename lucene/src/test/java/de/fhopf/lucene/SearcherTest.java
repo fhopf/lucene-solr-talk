@@ -1,5 +1,6 @@
 package de.fhopf.lucene;
 
+import de.fhopf.Result;
 import de.fhopf.Talk;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
@@ -32,7 +33,7 @@ public class SearcherTest {
         Talk talk2 = newCategoryTalk("Architektur");
         Talk talk3 = newCategoryTalk("Integration", "OSGi");
         indexer.index(talk1, talk2, talk3);
-        List<Document> documents = searcher.searchCategory("Architektur");
+        List<Result> documents = searcher.searchCategory("Architektur");
         assertEquals(2, documents.size());
     }
 
@@ -41,7 +42,7 @@ public class SearcherTest {
         Talk talk1 = newAuthorTalk("Florian Hopf");
         Talk talk2 = newAuthorTalk("Florian");
         indexer.index(talk1, talk2);
-        List<Document> documents = searcher.search("speaker:Florian");
+        List<Result> documents = searcher.search("speaker:Florian");
         assertEquals(2, documents.size());
         documents = searcher.search("speaker:\"Florian Hopf\"");
         assertEquals(1, documents.size());
@@ -70,9 +71,9 @@ public class SearcherTest {
         Talk notInCategoryWouldMatch = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat2"));
         indexer.index(inCategory, inCategoryNoMatch, notInCategoryWouldMatch);
 
-        List<Document> result = searcher.search("Titel", "cat1");
+        List<Result> result = searcher.search("Titel", "cat1");
         assertEquals(1, result.size());
-        assertEquals("Titel der trifft", result.get(0).get("title"));
+        assertEquals("Titel der trifft", result.get(0).getTitle());
     }
 
     @Test
@@ -86,14 +87,14 @@ public class SearcherTest {
         indexer.index(yesterdayMoreRelevant, today);
 
         // sanity check
-        List<Document> result = searcher.search("Titel Treffer");
+        List<Result> result = searcher.search("Titel Treffer");
         assertEquals(2, result.size());
-        assertEquals("Titel Treffer", result.get(0).get("title"));
+        assertEquals("Titel Treffer", result.get(0).getTitle());
 
         // sort
         result = searcher.searchSortedByDate("Titel", null);
         assertEquals(2, result.size());
-        assertEquals("Titel", result.get(0).get("title"));
+        assertEquals("Titel", result.get(0).getTitle());
 
     }
 
