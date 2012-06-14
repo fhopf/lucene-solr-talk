@@ -84,7 +84,7 @@ public class Indexer {
         doc.add(new Field("date", DateTools.timeToString(talk.date.getTime(), DateTools.Resolution.DAY), Field.Store.YES, Field.Index.NOT_ANALYZED));
 
         String all = extractAllText(talk);
-        doc.add(new Field("all", all, Field.Store.NO, Field.Index.ANALYZED));
+        doc.add(new Field("all", all, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
 
         return doc;
     }

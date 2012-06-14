@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 public class SearcherTest {
 
@@ -96,6 +97,23 @@ public class SearcherTest {
         assertEquals(2, result.size());
         assertEquals("Titel", result.get(0).getTitle());
 
+    }
+
+    @Test
+    public void searchWithHighlighter() throws ParseException {
+        StringBuilder content = new StringBuilder("Hier taucht das Wort auf ");
+        for (int i = 0; i < 10; i++) {
+            content.append(" und dazwischen ist ganz viel Text der das nicht enthält, ");
+        }
+        content.append("aber jetzt kommt das Wort nochmal.");
+
+        Talk talk = new Talk("", "", Collections.<String>emptyList(), new Date(), content.toString(), Collections.<String>emptyList());
+        indexer.index(talk);
+
+        List<Result> result = searcher.search("Wort");
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getExcerpt(), result.get(0).getExcerpt().contains("<B>Wort</B>"));
+        assertTrue(result.get(0).getExcerpt(), result.get(0).getExcerpt().contains("..."));
     }
 
     private Talk newAuthorTalk(String author) {

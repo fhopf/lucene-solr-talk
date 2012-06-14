@@ -1,7 +1,11 @@
 package de.fhopf.lucene;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import de.fhopf.Result;
+import org.apache.lucene.analysis.CachingTokenFilter;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
@@ -11,6 +15,7 @@ import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -52,9 +57,10 @@ public class Searcher {
             searcher = new IndexSearcher(IndexReader.open(directory));
             List<Result> result = new ArrayList<Result>();
             TopDocs topDocs = searcher.search(query, filter, 10, sort.or(Sort.RELEVANCE));
+            Highlighter highlighter = new Highlighter(new QueryScorer(query));
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
-                result.add(asResult(doc));
+                result.add(asResult(doc, query));
             }
             return result;
         } catch (IOException ex) {
@@ -70,9 +76,28 @@ public class Searcher {
         }
     }
 
-    private Result asResult(Document doc) {
+    private Result asResult(Document doc, Query query) {
         String title = doc.get("title");
-        String excerpt = "... excerpt ...";
+        TokenStream stream = TokenSources.getTokenStream("all", doc.get("all"),
+                new GermanAnalyzer(Version.LUCENE_36));
+        QueryScorer scorer = new QueryScorer(query, "all");
+        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 100);
+
+        Highlighter highlighter = new Highlighter(scorer);
+        highlighter.setTextFragmenter(fragmenter);
+
+        String excerpt = "";
+
+        try {
+            String[] fragments = highlighter.getBestFragments(stream, doc.get("all"), 5);
+            Joiner joiner = Joiner.on("...");
+            excerpt = joiner.join(fragments);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        } catch (InvalidTokenOffsetsException e) {
+            logger.error(e.getMessage(), e);
+        }
+
         List<String> speakers = Arrays.asList(doc.getValues("speaker"));
         List<String> categories = Arrays.asList(doc.getValues("category"));
         Date date = null;
