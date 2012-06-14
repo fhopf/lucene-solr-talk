@@ -1,12 +1,14 @@
-package de.fhopf.web;
+package de.fhopf.lucenesolrtalk.web;
 
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Environment;
+import com.yammer.dropwizard.views.ViewBundle;
 
 public class LuceneSearchService extends Service<LuceneSearchConfiguration> {
 
     public LuceneSearchService() {
         super("lucene-search");
+        addBundle(new ViewBundle());
     }
 
     @Override

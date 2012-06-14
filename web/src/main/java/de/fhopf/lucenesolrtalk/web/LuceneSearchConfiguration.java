@@ -1,4 +1,4 @@
-package de.fhopf.web;
+package de.fhopf.lucenesolrtalk.web;
 
 import com.yammer.dropwizard.config.Configuration;
 import org.codehaus.jackson.annotate.JsonProperty;
