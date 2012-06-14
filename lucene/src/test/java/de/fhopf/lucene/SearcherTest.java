@@ -66,6 +66,18 @@ public class SearcherTest {
 
     }
 
+    @Test
+    public void searchByQueryAndCategory() throws ParseException {
+        Talk inCategory = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"));
+        Talk inCategoryNoMatch = new Talk("", "kein Treffer", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"));
+        Talk notInCategoryWouldMatch = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat2"));
+        indexer.index(inCategory, inCategoryNoMatch, notInCategoryWouldMatch);
+
+        List<Document> result = searcher.search("Titel", "cat1");
+        assertEquals(1, result.size());
+        assertEquals("Titel der trifft", result.get(0).get("title"));
+    }
+
 
     private Talk newAuthorTalk(String author) {
         return new Talk("", "", Arrays.asList(author), new Date(), "", new ArrayList<String>());

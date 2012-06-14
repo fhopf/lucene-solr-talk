@@ -38,15 +38,15 @@ public class Searcher {
 
     public List<Document> searchCategory(String category) {
         Query query = new TermQuery(new Term("category", category));
-        return search(query);
+        return search(query, null);
     }
 
-    private List<Document> search(Query query) {
+    private List<Document> search(Query query, Filter filter) {
         IndexSearcher searcher = null;
         try {
             searcher = new IndexSearcher(IndexReader.open(directory));
             List<Document> result = new ArrayList<Document>();
-            TopDocs topDocs = searcher.search(query, 10);
+            TopDocs topDocs = searcher.search(query, filter, 10);
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
                 result.add(doc);
@@ -66,10 +66,18 @@ public class Searcher {
     }
 
     public List<Document> search(String query) throws ParseException {
+        return search(query, null);
+    }
+
+    public List<Document> search(String query, String category) throws ParseException {
         QueryParser queryParser = new QueryParser(Version.LUCENE_36, "all", new GermanAnalyzer(Version.LUCENE_36));
         Query actualQuery = queryParser.parse(query);
-        logger.info("Searching for {}", query);
-        return search(actualQuery);
+        Filter filter = null;
+        if (category != null && !category.trim().isEmpty()) {
+            filter = new TermRangeFilter("category", category, category, true, true);
+        }
+        logger.info("Searching for {} with filter {}", query, filter);
+        return search(actualQuery, filter);
 
     }
 
