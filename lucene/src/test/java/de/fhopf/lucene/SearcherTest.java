@@ -50,6 +50,22 @@ public class SearcherTest {
         assertEquals(1, documents.size());
     }
 
+    @Test
+    public void allCategories() {
+        Talk talk1 = newCategoryTalk("category1", "category3", "category2");
+        Talk talk2 = newCategoryTalk("category1", "category4");
+        indexer.index(talk1, talk2);
+
+        List<String> categories = searcher.getAllCategories();
+        assertEquals(4, categories.size());
+        // categories are sorted
+        assertEquals("category1", categories.get(0));
+        assertEquals("category2", categories.get(1));
+        assertEquals("category3", categories.get(2));
+        assertEquals("category4", categories.get(3));
+
+    }
+
 
     private Talk newAuthorTalk(String author) {
         return new Talk("", "", Arrays.asList(author), new Date(), "", new ArrayList<String>());

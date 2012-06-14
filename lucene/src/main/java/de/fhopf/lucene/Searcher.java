@@ -4,6 +4,7 @@ import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
@@ -42,7 +43,7 @@ public class Searcher {
             searcher = new IndexSearcher(IndexReader.open(directory));
             List<Document> result = new ArrayList<Document>();
             TopDocs topDocs = searcher.search(query, 10);
-            for (ScoreDoc scoreDoc: topDocs.scoreDocs) {
+            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
                 result.add(doc);
             }
@@ -68,7 +69,33 @@ public class Searcher {
 
     }
 
-    public static void main(String [] args) throws IOException, ParseException {
+    public List<String> getAllCategories() {
+        IndexReader reader = null;
+        try {
+            reader = IndexReader.open(directory);
+
+            Utils.logTermDictionary(reader);
+
+            TermEnum terms = reader.terms(new Term("category", ""));
+            List<String> categories = new ArrayList<String>();
+            if (terms.term() != null) {
+                do {
+                    Term term = terms.term();
+                    if (!"category".equals(term.field())) {
+                        break;
+                    }
+                    categories.add(term.text());
+                } while (terms.next());
+            }
+            return categories;
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            Utils.close(reader);
+        }
+    }
+
+    public static void main(String[] args) throws IOException, ParseException {
         if (args.length != 2) {
             System.out.println(String.format("Usage: java %s <indexdir> <query>", Searcher.class.getCanonicalName()));
             System.exit(0);
@@ -78,7 +105,7 @@ public class Searcher {
         Searcher searcher = new Searcher(dir);
         List<Document> docs = searcher.search(args[1]);
         System.out.println(String.format("Found %d results", docs.size()));
-        for (Document doc: docs) {
+        for (Document doc : docs) {
             System.out.println(String.format("%s", doc.get("title")));
         }
     }
