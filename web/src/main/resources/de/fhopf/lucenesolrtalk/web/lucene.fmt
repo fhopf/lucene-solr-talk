@@ -50,6 +50,11 @@
             <div class="row">
                 <div class="span9">
                     <form action="/lucene">
+                        <!--
+                            <#list categories as category>
+                                ${category?html}
+                            </#list>
+                        -->
                         <input type="text" name="query" value="${query?html}"/>
                         <input type="submit" value="Suchen"/>
                     </form>

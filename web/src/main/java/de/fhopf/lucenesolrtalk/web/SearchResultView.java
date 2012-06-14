@@ -1,6 +1,7 @@
 package de.fhopf.lucenesolrtalk.web;
 
 import com.yammer.dropwizard.views.View;
+import de.fhopf.Result;
 
 import java.util.List;
 
