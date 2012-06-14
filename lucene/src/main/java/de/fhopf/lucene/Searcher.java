@@ -21,6 +21,10 @@ import java.util.List;
 
 /**
  * Searches on an index.
+ *
+ * Note: When used from a webapp this implementation is not as efficient as it should be. On each request it opens
+ * a new IndexReader which can be quite costly. If you are interested in how to implement a SearchManager that takes
+ * care of opening and updating IndexReaders have a look at Chapter 11 of Lucene in Action.
  */
 public class Searcher {
 
