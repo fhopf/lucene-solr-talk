@@ -1,5 +1,6 @@
 package de.fhopf.lucene;
 
+import com.google.common.base.Optional;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
@@ -38,15 +39,15 @@ public class Searcher {
 
     public List<Document> searchCategory(String category) {
         Query query = new TermQuery(new Term("category", category));
-        return search(query, null);
+        return search(query, null, Optional.<Sort>absent());
     }
 
-    private List<Document> search(Query query, Filter filter) {
+    private List<Document> search(Query query, Filter filter, Optional<Sort> sort) {
         IndexSearcher searcher = null;
         try {
             searcher = new IndexSearcher(IndexReader.open(directory));
             List<Document> result = new ArrayList<Document>();
-            TopDocs topDocs = searcher.search(query, filter, 10);
+            TopDocs topDocs = searcher.search(query, filter, 10, sort.or(Sort.RELEVANCE));
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
                 result.add(doc);
@@ -70,6 +71,10 @@ public class Searcher {
     }
 
     public List<Document> search(String query, String category) throws ParseException {
+        return search(query, category, null);
+    }
+
+    private List<Document> search(String query, String category, Sort sort) throws ParseException {
         QueryParser queryParser = new QueryParser(Version.LUCENE_36, "all", new GermanAnalyzer(Version.LUCENE_36));
         Query actualQuery = queryParser.parse(query);
         Filter filter = null;
@@ -77,8 +82,13 @@ public class Searcher {
             filter = new TermRangeFilter("category", category, category, true, true);
         }
         logger.info("Searching for {} with filter {}", query, filter);
-        return search(actualQuery, filter);
+        return search(actualQuery, filter, Optional.fromNullable(sort));
+    }
 
+    public List<Document> searchSortedByDate(String query, String category) throws ParseException {
+        SortField field = new SortField("date", SortField.STRING, true);
+        Sort sort = new Sort(field);
+        return search(query, category, sort);
     }
 
     public List<String> getAllCategories() {

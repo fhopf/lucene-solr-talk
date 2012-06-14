@@ -10,10 +10,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -78,6 +75,27 @@ public class SearcherTest {
         assertEquals("Titel der trifft", result.get(0).get("title"));
     }
 
+    @Test
+    public void sortedByDate() throws ParseException {
+        Date now = new Date();
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.roll(Calendar.DAY_OF_MONTH, -1);
+        Date yesterday = cal.getTime();
+        Talk yesterdayMoreRelevant = new Talk("", "Titel Treffer", new ArrayList<String>(), yesterday, "", new ArrayList<String>());
+        Talk today = new Talk("", "Titel", new ArrayList<String>(), now, "", new ArrayList<String>());
+        indexer.index(yesterdayMoreRelevant, today);
+
+        // sanity check
+        List<Document> result = searcher.search("Titel Treffer");
+        assertEquals(2, result.size());
+        assertEquals("Titel Treffer", result.get(0).get("title"));
+
+        // sort
+        result = searcher.searchSortedByDate("Titel", null);
+        assertEquals(2, result.size());
+        assertEquals("Titel", result.get(0).get("title"));
+
+    }
 
     private Talk newAuthorTalk(String author) {
         return new Talk("", "", Arrays.asList(author), new Date(), "", new ArrayList<String>());
