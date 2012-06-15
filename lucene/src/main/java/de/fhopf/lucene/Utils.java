@@ -7,6 +7,8 @@ import org.apache.lucene.search.IndexSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class Utils {
@@ -36,6 +38,16 @@ public class Utils {
         if (searcher != null) {
             try {
                 searcher.close();
+            } catch (IOException e) {
+                logger.warn(e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void close(Closeable in) {
+        if (in != null) {
+            try {
+                in.close();
             } catch (IOException e) {
                 logger.warn(e.getMessage(), e);
             }

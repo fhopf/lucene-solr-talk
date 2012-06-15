@@ -12,8 +12,11 @@ dependencies {
     compile group: 'org.apache.lucene', name: 'lucene-highlighter', version: '3.6.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.4'
     compile group: 'com.google.guava', name: 'guava', version: '10.0.1'
+    compile group: 'org.apache.tika', name: 'tika-core', version: '1.1'
+    compile group: 'org.apache.tika', name: 'tika-parsers', version: '1.1'
     runtime group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.4'
     testCompile group: 'junit', name: 'junit', version: '4.10'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.0'
 }
 
 
@@ -21,11 +24,11 @@ configure(install.repositories.mavenInstaller) {
     pom.project {
         version '1.0-SNAPSHOT'
         artifactId 'lucene'
-	groupId 'de.fhopf.lucene'
+        groupId 'de.fhopf.lucene'
     }
 }
 
 task copyToLib(type: Copy) {
     into "$buildDir/output/lib"
-    from configurations.compile
+    from configurations.runtime
 }
