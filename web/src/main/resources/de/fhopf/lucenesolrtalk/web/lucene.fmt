@@ -59,13 +59,16 @@
                         <input type="submit" value="Suchen"/>
                     </form>
                 </div>
+                <div class="span3">
+                    <a href="/lucene?query=${query?html}&sort=date">Nach Datum sortieren</a>
+                </div>
             </div>
 
             <#list results as result>
                 <div class="row">
                     <div class="span9">
                         <h3>${result.title?html}</h3>
-                        <p>${result.excerpt?html}</p>
+                        <p>${result.excerpt}</p>
                         <p>Kategorien:
                         <#list result.categories as category>
                             ${category?html}&nbsp;
