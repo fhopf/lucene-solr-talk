@@ -1,5 +1,6 @@
 package de.fhopf.lucene;
 
+import com.google.common.base.Optional;
 import de.fhopf.Result;
 import de.fhopf.Talk;
 import org.apache.lucene.document.Document;
@@ -29,12 +30,12 @@ public class SearcherTest {
     }
 
     @Test
-    public void searchForSingleExactCategory() {
+    public void searchForSingleExactCategory() throws ParseException {
         Talk talk1 = newCategoryTalk("Architektur", "Integration");
         Talk talk2 = newCategoryTalk("Architektur");
         Talk talk3 = newCategoryTalk("Integration", "OSGi");
         indexer.index(talk1, talk2, talk3);
-        List<Result> documents = searcher.searchCategory("Architektur");
+        List<Result> documents = searcher.search("*:*", Optional.<String>of("Architektur"));
         assertEquals(2, documents.size());
     }
 
@@ -72,7 +73,7 @@ public class SearcherTest {
         Talk notInCategoryWouldMatch = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat2"));
         indexer.index(inCategory, inCategoryNoMatch, notInCategoryWouldMatch);
 
-        List<Result> result = searcher.search("Titel", "cat1");
+        List<Result> result = searcher.search("Titel", Optional.<String>of("cat1"));
         assertEquals(1, result.size());
         assertEquals("Titel der trifft", result.get(0).getTitle());
     }
@@ -93,7 +94,7 @@ public class SearcherTest {
         assertEquals("Titel Treffer", result.get(0).getTitle());
 
         // sort
-        result = searcher.searchSortedByDate("Titel", null);
+        result = searcher.searchSortedByDate("Titel", Optional.<String>absent());
         assertEquals(2, result.size());
         assertEquals("Titel", result.get(0).getTitle());
 

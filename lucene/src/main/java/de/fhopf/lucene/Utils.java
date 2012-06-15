@@ -3,6 +3,7 @@ package de.fhopf.lucene;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.search.IndexSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,4 +32,13 @@ public class Utils {
     }
 
 
+    public static void close(IndexSearcher searcher) {
+        if (searcher != null) {
+            try {
+                searcher.close();
+            } catch (IOException e) {
+                logger.warn(e.getMessage(), e);
+            }
+        }
+    }
 }

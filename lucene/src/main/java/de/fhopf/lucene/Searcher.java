@@ -46,17 +46,12 @@ public class Searcher {
         this.directory = directory;
     }
 
-    public List<Result> searchCategory(String category) {
-        Query query = new TermQuery(new Term("category", category));
-        return search(query, null, Optional.<Sort>absent());
-    }
-
-    private List<Result> search(Query query, Filter filter, Optional<Sort> sort) {
+    private List<Result> search(Query query, Optional<Filter> filter, Optional<Sort> sort) {
         IndexSearcher searcher = null;
         try {
             searcher = new IndexSearcher(IndexReader.open(directory));
             List<Result> result = new ArrayList<Result>();
-            TopDocs topDocs = searcher.search(query, filter, 10, sort.or(Sort.RELEVANCE));
+            TopDocs topDocs = searcher.search(query, filter.orNull(), 10, sort.or(Sort.RELEVANCE));
             Highlighter highlighter = new Highlighter(new QueryScorer(query));
             for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                 Document doc = searcher.doc(scoreDoc.doc);
@@ -66,37 +61,13 @@ public class Searcher {
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         } finally {
-            if (searcher != null) {
-                try {
-                    searcher.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            Utils.close(searcher);
         }
     }
 
     private Result asResult(Document doc, Query query) {
         String title = doc.get("title");
-        TokenStream stream = TokenSources.getTokenStream("all", doc.get("all"),
-                new GermanAnalyzer(Version.LUCENE_36));
-        QueryScorer scorer = new QueryScorer(query, "all");
-        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 100);
-
-        Highlighter highlighter = new Highlighter(scorer);
-        highlighter.setTextFragmenter(fragmenter);
-
-        String excerpt = "";
-
-        try {
-            String[] fragments = highlighter.getBestFragments(stream, doc.get("all"), 5);
-            Joiner joiner = Joiner.on("...");
-            excerpt = joiner.join(fragments);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } catch (InvalidTokenOffsetsException e) {
-            logger.error(e.getMessage(), e);
-        }
+        String excerpt = extractExcerpt(doc, query);
 
         List<String> speakers = Arrays.asList(doc.getValues("speaker"));
         List<String> categories = Arrays.asList(doc.getValues("category"));
@@ -109,37 +80,61 @@ public class Searcher {
         return new Result(title, excerpt, categories, speakers, date);
     }
 
+    private String extractExcerpt(Document doc, Query query) {
+        TokenStream stream = TokenSources.getTokenStream("all", doc.get("all"),
+                new GermanAnalyzer(Version.LUCENE_36));
+        QueryScorer scorer = new QueryScorer(query, "all");
+        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 100);
+
+        Highlighter highlighter = new Highlighter(scorer);
+        highlighter.setTextFragmenter(fragmenter);
+
+        String excerpt = "";
+        String content = doc.get("all");
+
+        try {
+            String[] fragments = highlighter.getBestFragments(stream, content, 5);
+            Joiner joiner = Joiner.on("...");
+            excerpt = joiner.join(fragments);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        } catch (InvalidTokenOffsetsException e) {
+            logger.error(e.getMessage(), e);
+        }
+        // TODO add the beginning of the content as excerpt if it's not available
+
+        return excerpt;
+    }
+
     public List<Result> search(String query) throws ParseException {
-        return search(query, null);
+        return search(query, Optional.<String>absent());
     }
 
-    public List<Result> search(String query, String category) throws ParseException {
-        return search(query, category, null);
+    public List<Result> search(String query, Optional<String> category) throws ParseException {
+        return search(query, category, Optional.<Sort>absent());
     }
 
-    private List<Result> search(String query, String category, Sort sort) throws ParseException {
+    private List<Result> search(String query, Optional<String> category, Optional<Sort> sort) throws ParseException {
         QueryParser queryParser = new QueryParser(Version.LUCENE_36, "all", new GermanAnalyzer(Version.LUCENE_36));
         Query actualQuery = queryParser.parse(query);
-        Filter filter = null;
-        if (category != null && !category.trim().isEmpty()) {
-            filter = new TermRangeFilter("category", category, category, true, true);
+        Optional<Filter> filter = Optional.absent();
+        if (!category.or("").isEmpty()) {
+            filter = Optional.<Filter>of(new TermRangeFilter("category", category.get(), category.get(), true, true));
         }
         logger.info("Searching for {} with filter {}", query, filter);
-        return search(actualQuery, filter, Optional.fromNullable(sort));
+        return search(actualQuery, filter, sort);
     }
 
-    public List<Result> searchSortedByDate(String query, String category) throws ParseException {
+    public List<Result> searchSortedByDate(String query, Optional<String> category) throws ParseException {
         SortField field = new SortField("date", SortField.STRING, true);
         Sort sort = new Sort(field);
-        return search(query, category, sort);
+        return search(query, category, Optional.of(sort));
     }
 
     public List<String> getAllCategories() {
         IndexReader reader = null;
         try {
             reader = IndexReader.open(directory);
-
-            Utils.logTermDictionary(reader);
 
             TermEnum terms = reader.terms(new Term("category", ""));
             List<String> categories = new ArrayList<String>();
