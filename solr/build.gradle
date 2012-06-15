@@ -1,0 +1,30 @@
+import org.gradle.api.plugins.jetty.JettyRunWar
+
+apply plugin: 'java'
+apply plugin: 'jetty'
+
+repositories {
+  mavenCentral()
+}
+
+configurations {
+  solrWebApp
+}
+
+dependencies {
+  solrWebApp "org.apache.solr:solr:3.6.0@war"
+}
+
+
+task runSolr(type: JettyRunWar) {
+  webApp = configurations.solrWebApp.singleFile
+
+  // more configuration
+  httpPort = 8082
+  contextPath = 'solr'
+  
+}
+
+jettyRun.doFirst {
+	System.setProperty("solr.solr.home","./solr/conf")
+}
