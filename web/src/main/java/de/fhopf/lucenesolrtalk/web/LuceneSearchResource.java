@@ -35,14 +35,15 @@ public class LuceneSearchResource {
 
     @GET
     @Timed
-    public SearchResultView search(@QueryParam("query")Optional<String> query, @QueryParam("sort") Optional<String> sort) throws ParseException {
+    public SearchResultView search(@QueryParam("query")Optional<String> query, @QueryParam("sort") Optional<String> sort,
+                                   @QueryParam("category") Optional<String> category) throws ParseException {
         List<Result> results = Collections.emptyList();
         List<String> categories = searcher.getAllCategories();
         if (query.isPresent()) {
             if ("date".equals(sort.or(""))) {
-                results = searcher.searchSortedByDate(query.get(), null);
+                results = searcher.searchSortedByDate(query.get(), category);
             } else {
-                results = searcher.search(query.get());
+                results = searcher.search(query.get(), category);
             }
         }
 

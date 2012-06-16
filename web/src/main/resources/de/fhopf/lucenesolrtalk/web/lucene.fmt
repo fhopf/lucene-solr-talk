@@ -50,11 +50,12 @@
             <div class="row">
                 <div class="span9">
                     <form action="/lucene">
-                        <!--
+                        <select name="category">
+                            <option value="">---Kategorien---</option>
                             <#list categories as category>
-                                ${category?html}
+                                <option value="${category}">${category?html}</option>
                             </#list>
-                        -->
+                        </select>
                         <input type="text" name="query" value="${query?html}"/>
                         <input type="submit" value="Suchen"/>
                     </form>
