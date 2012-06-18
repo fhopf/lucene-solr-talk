@@ -4,27 +4,29 @@ apply plugin: 'java'
 apply plugin: 'jetty'
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
+// custom configuration for running the webapp
 configurations {
-  solrWebApp
+    solrWebApp
 }
 
 dependencies {
-  solrWebApp "org.apache.solr:solr:3.6.0@war"
+    solrWebApp "org.apache.solr:solr:3.6.0@war"
 }
 
-
+// custom task that configures the jetty plugin
 task runSolr(type: JettyRunWar) {
-  webApp = configurations.solrWebApp.singleFile
+    webApp = configurations.solrWebApp.singleFile
 
-  // more configuration
-  httpPort = 8082
-  contextPath = 'solr'
-  
+    // jetty configuration
+    httpPort = 8082
+    contextPath = 'solr'
+
 }
 
+// executed before jetty plugin
 jettyRun.doFirst {
-	System.setProperty("solr.solr.home","./solr/conf")
+    System.setProperty("solr.solr.home", "./solr/conf")
 }
