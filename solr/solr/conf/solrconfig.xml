@@ -299,8 +299,7 @@
     -->
   <!-- <jmx agentId="myAgent" /> -->
   <!-- If you want to start a new MBeanServer, specify the serviceUrl -->
-  <!-- <jmx serviceUrl="service:jmx:rmi:///jndi/rmi://localhost:9999/solr"/>
-    -->
+ <!-- <jmx serviceUrl="service:jmx:rmi:///jndi/rmi://localhost:9999/solr"/>-->
 
   <!-- The default high-performance update handler -->
   <updateHandler class="solr.DirectUpdateHandler2">
@@ -779,6 +778,15 @@
          <str>nameOfCustomComponent2</str>
        </arr>
       -->
+  </requestHandler>
+
+  <requestHandler name="standard" class="solr.StandardRequestHandler" >
+     <lst name="defaults">
+       <str name="echoParams">explicit</str>
+       <int name="rows">10</int>
+       <str name="df">content</str>
+     </lst>
+ 
   </requestHandler>
 
   <!-- A Robust Example
