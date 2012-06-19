@@ -41,11 +41,11 @@ public class BasicConfigurationTest extends SolrTestCaseJ4 {
 
     @Test
     public void simpleDocumentIsIndexedAndFound() throws SolrServerException, IOException {
-        assertU(adoc("path", "/tmp/foo", "title", "the title"));
+        assertU(adoc("path", "/tmp/foo", "content", "Some important content."));
         assertU(commit());
 
         assertQ("added document found",
-                req("title:title")
+                req("important")
                 , "//result[@numFound='1']"
         );
     }
