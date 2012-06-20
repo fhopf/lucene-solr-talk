@@ -24,7 +24,7 @@ configure(install.repositories.mavenInstaller) {
     pom.project {
         version '1.0-SNAPSHOT'
         artifactId 'lucene'
-        groupId 'de.fhopf.lucene'
+        groupId 'de.fhopf.lucenesolrtalk'
     }
 }
 
