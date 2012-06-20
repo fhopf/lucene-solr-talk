@@ -3,8 +3,11 @@ package de.fhopf.lucenesolrtalk.web.solr;
 import com.google.common.base.Optional;
 import com.yammer.metrics.annotation.Timed;
 import de.fhopf.Result;
+import de.fhopf.lucenesolrtalk.web.Categories;
+import de.fhopf.lucenesolrtalk.web.Faceting;
 import de.fhopf.lucenesolrtalk.web.SearchResultView;
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.solr.client.solrj.SolrServerException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -26,19 +29,14 @@ public class SolrSearchResource {
 
     @GET
     @Timed
-    public SearchResultView search(@QueryParam("query")Optional<String> query, @QueryParam("sort") Optional<String> sort,
-                                   @QueryParam("category") Optional<String> category) throws ParseException {
+    public SearchResultView search(@QueryParam("query") Optional<String> query, @QueryParam("sort") Optional<String> sort,
+                                   @QueryParam("category") Optional<String> category) throws SolrServerException {
         List<Result> results = Collections.emptyList();
-        List<String> categories = searcher.getAllCategories();
-//        if (query.isPresent()) {
-//            if ("date".equals(sort.or(""))) {
-//                results = searcher.searchSortedByDate(query.get(), category);
-//            } else {
-//                results = searcher.search(query.get(), category);
-//            }
-//        }
-
-        return new SearchResultView(query.or("-"), results, categories);
+        List<String> categoryValues = searcher.getAllCategories();
+        SolrSearchResult result = searcher.search(query);
+        Categories categories = new Categories(categoryValues, category.or(""));
+        Faceting faceting = new Faceting(result.categoryFacet, result.speakerFacet, result.typeFacet);
+        return new SearchResultView(query.or(""), result.results, categories, faceting);
     }
 
 }

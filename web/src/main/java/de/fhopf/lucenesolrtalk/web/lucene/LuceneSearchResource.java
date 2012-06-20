@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.yammer.metrics.annotation.Timed;
 import de.fhopf.Result;
 import de.fhopf.lucene.Searcher;
+import de.fhopf.lucenesolrtalk.web.Categories;
 import de.fhopf.lucenesolrtalk.web.SearchResultView;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryParser.ParseException;
@@ -48,6 +49,6 @@ public class LuceneSearchResource {
             }
         }
 
-        return new SearchResultView(query.or("-"), results, categories);
+        return new SearchResultView(query.or("-"), results, new Categories(categories, category.or("")));
     }
 }

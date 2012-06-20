@@ -37,10 +37,13 @@
                         </a>
                         <div class="nav-collapse">
                             <ul class="nav">
-
-			                    <li class="active"><a href="#">Lucene</a></li>
-                                <li><a href="/solr/">Solr</a></li>
-
+                                <#if path = "/lucene/">
+                                    <li class="active"><a href="/lucene/">Lucene</a></li>
+                                    <li><a href="/solr/">Solr</a></li>
+                                <#else>
+                                    <li><a href="/lucene/">Lucene</a></li>
+                                    <li class="active"><a href="/solr/">Solr</a></li>
+                                </#if>
                             </ul>
                         </div><!--/.nav-collapse -->
                     </div>
@@ -49,11 +52,15 @@
 
             <div class="row">
                 <div class="span9">
-                    <form action="/lucene">
+                    <form action="${path}">
                         <select name="category">
                             <option value="">---Kategorien---</option>
-                            <#list categories as category>
-                                <option value="${category}">${category?html}</option>
+                            <#list categories.iterator() as category>
+                                <#if category == categories.current>
+                                    <option value="${category}" selected="selected">${category?html}</option>
+                                <#else>
+                                    <option value="${category}">${category?html}</option>
+                                </#if>
                             </#list>
                         </select>
                         <input type="text" name="query" value="${query?html}"/>
@@ -61,7 +68,7 @@
                     </form>
                 </div>
                 <div class="span3">
-                    <a href="/lucene?query=${query?html}&sort=date">Nach Datum sortieren</a>
+                    <a href="${path}?query=${query?html}&sort=date">Nach Datum sortieren</a>
                 </div>
             </div>
 
@@ -71,17 +78,13 @@
                         <h3>${result.title?html}</h3>
                         <p>${result.excerpt}</p>
                         <p>Kategorien:
-                        <#list result.categories as category>
+                        <#list result.categoryFacet as category>
                             ${category?html}&nbsp;
                         </#list>
                         </p>
                     </div>
                 </div>
             </#list>
-
-
         </div>
-
-
     </body>
 </html>

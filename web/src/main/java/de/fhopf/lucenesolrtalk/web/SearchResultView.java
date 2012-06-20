@@ -5,27 +5,31 @@ import de.fhopf.Result;
 
 import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * User: flo
- * Date: 13.06.12
- * Time: 13:37
- * To change this template use File | Settings | File Templates.
- */
 public class SearchResultView extends View {
 
-    private final List<String> categories;
+    private final Categories categories;
     private final String query;
     private final List<Result> results;
+    private final Faceting faceting;
+    private String path;
 
-    public SearchResultView(String query, List<Result> results, List<String> categories) {
+    public SearchResultView(String query, List<Result> results, Categories categories) {
+        this(query, results, categories, null);
+        // should be moved to the resource
+        this.path = "/lucene/";
+    }
+
+    public SearchResultView(String query, List<Result> results, Categories categories, Faceting faceting) {
         super("result.fmt");
         this.query = query;
         this.results = results;
         this.categories = categories;
+        this.faceting = faceting;
+        // should be moved to the resource
+        this.path = "/solr/";
     }
 
-    public List<String> getCategories() {
+    public Categories getCategories() {
         return categories;
     }
 
@@ -35,5 +39,13 @@ public class SearchResultView extends View {
 
     public List<Result> getResults() {
         return results;
+    }
+
+    public Faceting getFaceting() {
+        return faceting;
+    }
+
+    public String getPath() {
+        return path;
     }
 }

@@ -13,9 +13,10 @@ public class SearchConfiguration extends Configuration {
 
     @NotEmpty
     @JsonProperty
-    private String indexDir;
+    public String indexDir;
 
-    public String getIndexDir() {
-        return indexDir;
-    }
+    @NotEmpty
+    @JsonProperty
+    public String solrUrl;
+
 }

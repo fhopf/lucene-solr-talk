@@ -1,1 +1,2 @@
 indexDir: /tmp/myindex/
+solrUrl: http://localhost:8082/solr

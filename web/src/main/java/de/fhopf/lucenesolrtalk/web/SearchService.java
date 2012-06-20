@@ -7,6 +7,9 @@ import com.yammer.dropwizard.views.ViewBundle;
 import de.fhopf.lucenesolrtalk.web.lucene.LuceneSearchResource;
 import de.fhopf.lucenesolrtalk.web.solr.SolrSearchResource;
 import de.fhopf.lucenesolrtalk.web.solr.SolrSearcher;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
 public class SearchService extends Service<SearchConfiguration> {
 
@@ -17,9 +20,10 @@ public class SearchService extends Service<SearchConfiguration> {
     }
 
     @Override
-    protected void initialize(SearchConfiguration luceneSearchConfiguration, Environment environment) throws Exception {
-        environment.addResource(new LuceneSearchResource(luceneSearchConfiguration.getIndexDir()));
-        environment.addResource(new SolrSearchResource(new SolrSearcher()));
+    protected void initialize(SearchConfiguration searchConfiguration, Environment environment) throws Exception {
+        environment.addResource(new LuceneSearchResource(searchConfiguration.indexDir));
+        SolrServer server = new CommonsHttpSolrServer(searchConfiguration.solrUrl);
+        environment.addResource(new SolrSearchResource(new SolrSearcher(server)));
     }
 
     public static void main(String [] args) throws Exception {
