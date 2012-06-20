@@ -19,7 +19,7 @@ public class SearchResultView extends View {
     private final List<Result> results;
 
     public SearchResultView(String query, List<Result> results, List<String> categories) {
-        super("lucene.fmt");
+        super("result.fmt");
         this.query = query;
         this.results = results;
         this.categories = categories;

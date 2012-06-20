@@ -9,15 +9,11 @@ import javax.annotation.Nonnull;
 /**
  * Main configuration for the search service.
  */
-public class LuceneSearchConfiguration extends Configuration {
+public class SearchConfiguration extends Configuration {
 
     @NotEmpty
     @JsonProperty
     private String indexDir;
-
-    public LuceneSearchConfiguration(String indexDir) {
-        this.indexDir = indexDir;
-    }
 
     public String getIndexDir() {
         return indexDir;
