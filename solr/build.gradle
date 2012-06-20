@@ -29,6 +29,6 @@ task runSolr(type: JettyRunWar) {
 }
 
 // executed before jetty plugin
-jettyRun.doFirst {
-    System.setProperty("solr.solr.home", "./solr/conf")
+runSolr.doFirst {
+    System.setProperty("solr.solr.home", "./solrhome")
 }
