@@ -708,7 +708,23 @@
        not be initialized until the first request that uses it.
 
     -->
-  <!-- SearchHandler
+
+    <requestHandler name="/jugka" class="solr.SearchHandler">
+        <lst name="defaults">
+            <str name="echoParams">explicit</str>
+            <int name="rows">10</int>
+            <str name="q.op">AND</str>
+            <str name="df">content</str>
+            <str name="facet">on</str>
+            <str name="facet.field">category</str>
+            <str name="facet.field">speaker</str>
+            <str name="hl">on</str>
+            <str name="hl.fl">title content text</str>
+        </lst>
+
+    </requestHandler>
+
+    <!-- SearchHandler
 
        http://wiki.apache.org/solr/SearchHandler
 
@@ -725,8 +741,6 @@
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
        <str name="df">text</str>
-         <str name="facet">on</str>
-         <str name="facet.field">category</str>
      </lst>
     <!-- In addition to defaults, "appends" params can be specified
          to identify values which should be appended to the list of
@@ -774,23 +788,8 @@
          list can either be overridden completely, or components can be
          prepended or appended to the default list.  (see below)
       -->
-    <!--
-       <arr name="components">
-         <str>nameOfCustomComponent1</str>
-         <str>nameOfCustomComponent2</str>
-       </arr>
-      -->
   </requestHandler>
 
-  <requestHandler name="standard" class="solr.StandardRequestHandler" >
-     <lst name="defaults">
-       <str name="echoParams">explicit</str>
-       <int name="rows">10</int>
-       <str name="q.op">AND</str>
-       <str name="df">content</str>
-     </lst>
- 
-  </requestHandler>
 
   <!-- A Robust Example
 
