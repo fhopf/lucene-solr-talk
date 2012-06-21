@@ -14,14 +14,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * TODO: this test always uses the first request handler defined in the config
+ * why is that?
+ */
 public class ServerBasedTalkTest extends SolrTestCaseJ4 {
 
     private EmbeddedSolrServer server;
+    private SolrParams query;
 
     @BeforeClass
     public static void initCore() throws Exception {
-        SolrTestCaseJ4.initCore("solr/conf/solrconfig.xml", "solr/conf/schema.xml");
+        SolrTestCaseJ4.initCore("solrhome/conf/solrconfig.xml", "solrhome/conf/schema.xml", "solrhome/");
     }
 
     @Before
@@ -31,8 +38,13 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
 
     @Test
     public void queryOnEmptyIndexNoResults() throws SolrServerException {
-        QueryResponse response = server.query(new SolrQuery("text that is not found"));
+        QueryResponse response = server.query(query("text that is not found"));
         assertTrue(response.getResults().isEmpty());
+    }
+
+    private SolrQuery query(String text) {
+        SolrQuery query = new SolrQuery(text);
+        return query.setQueryType("/jugka");
     }
 
     @Test
@@ -44,8 +56,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
         server.add(document);
         server.commit();
 
-        SolrParams params = new SolrQuery("ecke");
-        QueryResponse response = server.query(params);
+        QueryResponse response = server.query(query("ecke"));
         assertEquals(1L, response.getResults().getNumFound());
         assertEquals("/tmp/foo", response.getResults().get(0).get("path"));
     }
@@ -68,7 +79,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
 
         server.commit();
 
-        QueryResponse response = server.query(new SolrQuery("ecke"));
+        QueryResponse response = server.query(query("ecke"));
         assertEquals(2L, response.getResults().getNumFound());
         FacetField facet = response.getFacetField("category");
         assertNotNull(facet);
@@ -76,7 +87,24 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
         FacetField.Count cat1 = facet.getValues().get(0);
         assertEquals("cat1", cat1.getName());
         assertEquals(2, cat1.getCount());
+    }
 
+    @Test
+    public void matchIsHighlighted() throws IOException, SolrServerException {
+        SolrInputDocument document = new SolrInputDocument();
+        document.addField("path", "/tmp/foo");
+        document.addField("content", "Mein Hut der hat 4 Ecken");
+        document.addField("category", "cat1");
+        document.addField("category", "cat2");
+        server.add(document);
+        server.commit();
+
+        QueryResponse response = server.query(query("hut"));
+        assertEquals(1, response.getResults().size());
+        assertNotNull(response.getHighlighting());
+        Map<String, List<String>> fragments = response.getHighlighting().get("/tmp/foo");
+        assertEquals(1, fragments.size());
+        assertTrue(fragments.get("content").get(0).matches(".*<em>Hut</em>.*"));
     }
 
     @After

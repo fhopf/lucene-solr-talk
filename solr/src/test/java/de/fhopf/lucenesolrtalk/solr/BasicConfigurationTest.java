@@ -2,6 +2,7 @@ package de.fhopf.lucenesolrtalk.solr;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.request.SolrQueryRequest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -18,9 +19,13 @@ public class BasicConfigurationTest extends SolrTestCaseJ4 {
     @Test
     public void noResultInEmptyIndex() throws SolrServerException {
         assertQ("test query on empty index",
-                req("text that is not found")
+                jugkaRequest("text that is not found")
                 , "//result[@numFound='0']"
         );
+    }
+
+    private static SolrQueryRequest jugkaRequest(String s) {
+        return req("q", s, "qt", "/jugka");
     }
 
     @Test
@@ -34,7 +39,7 @@ public class BasicConfigurationTest extends SolrTestCaseJ4 {
         assertU(commit());
 
         assertQ("added document found",
-                req("important")
+                jugkaRequest("important")
                 , "//result[@numFound='1']"
         );
     }
