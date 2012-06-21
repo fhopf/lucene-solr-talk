@@ -4,6 +4,7 @@ import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.request.SolrQueryRequest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -41,6 +42,20 @@ public class BasicConfigurationTest extends SolrTestCaseJ4 {
         assertQ("added document found",
                 jugkaRequest("important")
                 , "//result[@numFound='1']"
+        );
+    }
+
+    @Test
+    @Ignore("q.alt only works for dismax which makes more tests fail")
+    public void allDocsAreReturnedWhenQueryMisses() {
+        assertU(adoc("path", "/tmp/foo", "content", "Some important content."));
+        assertU(adoc("path", "/tmp/bar", "content", "more content."));
+
+        assertU(commit());
+
+        assertQ("added document found",
+                lrf.makeRequest("qt", "/jugka")
+                , "//result[@numFound='2']"
         );
     }
 

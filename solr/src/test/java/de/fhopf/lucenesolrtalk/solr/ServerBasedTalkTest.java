@@ -104,7 +104,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
         assertNotNull(response.getHighlighting());
         Map<String, List<String>> fragments = response.getHighlighting().get("/tmp/foo");
         assertEquals(1, fragments.size());
-        assertTrue(fragments.get("content").get(0).matches(".*<em>Hut</em>.*"));
+        assertTrue(fragments.get("content").get(0).matches(".*<b style=.*>Hut</b>.*"));
     }
 
     @After

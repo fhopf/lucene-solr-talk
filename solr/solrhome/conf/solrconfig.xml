@@ -714,12 +714,33 @@
             <str name="echoParams">explicit</str>
             <int name="rows">10</int>
             <str name="q.op">AND</str>
+            <str name="q.alt">*:*</str>
+            <!--<str name="defType">edismax</str>-->
             <str name="df">content</str>
             <str name="facet">on</str>
             <str name="facet.field">category</str>
             <str name="facet.field">speaker</str>
+            <!-- for long texts consider using Fast Vector Highlighter -->
             <str name="hl">on</str>
             <str name="hl.fl">title content text</str>
+            <!-- only sensible when searching on multiple fields -->
+            <!--<str name="hl.requireFieldMatch">true</str>-->
+            <str name="hl.usePhraseHighlighter">true</str>
+            <str name="hl.highlightMultiTerm">true</str>
+            <!-- defaults to 1: max number of fragments to generate -->
+            <str name="hl.content.snippets">3</str>
+            <!-- maximum number of characters per fragment, defaults to 100 -->
+            <str name="hl.fragsize">100</str>
+            <!-- prevents overlapping fragments -->
+            <str name="hl.mergeContigous">true</str>
+            <!-- return a default field when none matched -->
+            <!-- somehow doesn't work for *:* -->
+            <!--<str name="hl.content.alternateField">content</str>
+            <str name="hl.content.maxAlternateFieldLength">200</str>-->
+            <str name="hl.formatter">html</str>
+            <str name="hl.simple.pre"><![CDATA[<b style="background: yellow">]]></str>
+            <str name="hl.simple.post"><![CDATA[</b>]]></str>
+
         </lst>
 
     </requestHandler>
