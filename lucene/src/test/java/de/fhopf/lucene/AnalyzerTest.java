@@ -1,8 +1,10 @@
 package de.fhopf.lucene;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
+import org.apache.lucene.analysis.de.GermanLightStemFilter;
+import org.apache.lucene.analysis.de.GermanNormalizationFilter;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -15,47 +17,61 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
-/**
- * Created with IntelliJ IDEA.
- * User: flo
- * Date: 13.06.12
- * Time: 17:11
- * To change this template use File | Settings | File Templates.
- */
 public class AnalyzerTest {
 
-    private String text = "Es gibt viele Freuden in unseres Herrgotts Welt, nur muss man sich auf das Suchen verstehen.";
+    private String text = "Die Stadt liegt in den Bergen. Vom Berg kann man die Stadt sehen.";
+
+    private static final Analyzer ONLY_TOKENIZED = new Analyzer() {
+        @Override
+        public TokenStream tokenStream(String fieldName, Reader reader) {
+            return new StandardTokenizer(Version.LUCENE_36, reader);
+        }
+    };
+
+    private static final Analyzer TOKENIZED_AND_LOWERCASED = new ReusableAnalyzerBase() {
+        @Override
+        protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+            Tokenizer source = new StandardTokenizer(Version.LUCENE_36, reader);
+            return new TokenStreamComponents(source, new LowerCaseFilter(Version.LUCENE_36, source));
+        }
+    };
+
+    private static final Analyzer TOKENIZED_AND_LOWERCASED_AND_STEMMED = new ReusableAnalyzerBase() {
+        @Override
+        protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+            Tokenizer source = new StandardTokenizer(Version.LUCENE_36, reader);
+            TokenStream result = new LowerCaseFilter(Version.LUCENE_36, source);
+            result = new GermanNormalizationFilter(result);
+            result = new GermanLightStemFilter(result);
+            return new TokenStreamComponents(source, result);
+        }
+    };
 
     @Test
-    public void analyzeText() throws IOException {
-
-        Reader reader = new StringReader(text);
-
-        Analyzer analyzer = new GermanAnalyzer(Version.LUCENE_36);
-
-        TokenStream stream = analyzer.tokenStream("dummy", reader);
-
-        CharTermAttribute termAttribute = stream.addAttribute(CharTermAttribute.class);
-
-        StringBuilder result = new StringBuilder();
-
-        while (stream.incrementToken()) {
-            result.append(termAttribute.toString());
-            result.append(" ");
-        }
-
-        System.out.println("[" + result.toString() + "]");
-        assertEquals("gibt viel freud uns herrgott welt such versteh", result.toString().trim());
+    public void tokenize() throws IOException {
+        assertAnalyzed(text, ONLY_TOKENIZED, "Die", "Stadt", "liegt", "in", "den", "Bergen", "Vom", "Berg", "kann", "man", "die", "sehen");
     }
 
     @Test
-    public void displayTermDictionary() throws IOException {
+    public void tokenizeAndLowercase() throws IOException {
+        assertAnalyzed(text, TOKENIZED_AND_LOWERCASED, "die", "stadt", "liegt", "in", "den", "bergen", "vom", "berg", "kann", "man", "sehen");
+    }
 
+    @Test
+    public void tokenizedAndLowercasedAndStemmed() throws IOException {
+        assertAnalyzed(text, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "die", "stadt", "liegt", "in", "den", "berg", "vom", "kann", "man", "seh");
+    }
+
+    private void assertAnalyzed(String text, Analyzer analyzer, String ... expectedTokens) throws IOException {
         Directory dir = new RAMDirectory();
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new GermanAnalyzer(Version.LUCENE_36));
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         IndexWriter writer = new IndexWriter(dir, config);
 
         Document doc = new Document();
@@ -63,24 +79,44 @@ public class AnalyzerTest {
 
         writer.addDocument(doc);
 
-        doc = new Document();
-        doc.add(new Field("name", "Suchen und Finden", Field.Store.NO, Field.Index.ANALYZED));
-        writer.addDocument(doc);
-
         writer.close();
 
-        IndexReader reader = IndexReader.open(dir);
+        IndexReader indexReader = IndexReader.open(dir);
 
-        TermEnum terms = reader.terms();
+        TermEnum terms = indexReader.terms();
 
         int count = 0;
+        List<String> expectedTokenList = Arrays.asList(expectedTokens);
 
         while (terms.next()) {
             count++;
             Term term = terms.term();
-            System.out.println(term.text());
+            assertTrue(term.text(), expectedTokenList.contains(term.text()));
         }
-
-        assertEquals(9, count);
+        assertEquals(expectedTokens.length, count);
     }
+
+    private List<String> getTokens(TokenStream tokenStream) throws IOException {
+        CharTermAttribute termAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+
+        List<String> tokens = new ArrayList<String>();
+
+        while (tokenStream.incrementToken()) {
+            tokens.add(termAttribute.toString());
+        }
+        return tokens;
+    }
+
+    private String toString(TokenStream tokenStream) throws IOException {
+        CharTermAttribute termAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+
+        StringBuilder result = new StringBuilder();
+
+        while (tokenStream.incrementToken()) {
+            result.append(termAttribute.toString());
+            result.append(" ");
+        }
+        return result.toString();
+    }
+
 }
