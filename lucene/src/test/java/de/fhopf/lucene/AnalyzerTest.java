@@ -6,14 +6,23 @@ import org.apache.lucene.analysis.de.GermanLightStemFilter;
 import org.apache.lucene.analysis.de.GermanNormalizationFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.*;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -67,6 +76,47 @@ public class AnalyzerTest {
     @Test
     public void tokenizedAndLowercasedAndStemmed() throws IOException {
         assertAnalyzed(text, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "die", "stadt", "liegt", "in", "den", "berg", "vom", "kann", "man", "seh");
+    }
+
+    @Test
+    public void indexExampleTalks() throws IOException, ParseException {
+        Document luceneSolr = new Document();
+        luceneSolr.add(new Field("title", "Integration ganz einfach mit Apache Camel", Field.Store.YES, Field.Index.ANALYZED));
+        luceneSolr.add(new Field("date", "20120404", Field.Store.NO, Field.Index.ANALYZED));
+        luceneSolr.add(new Field("speaker", "Christian Schneider", Field.Store.YES, Field.Index.ANALYZED));
+
+        Document karaf = new Document();
+        karaf.add(new Field("title", "Apache Karaf", Field.Store.YES, Field.Index.ANALYZED));
+        karaf.add(new Field("date", "20120424", Field.Store.NO, Field.Index.ANALYZED));
+        karaf.add(new Field("speaker", "Christian Schneider", Field.Store.YES, Field.Index.ANALYZED));
+        karaf.add(new Field("speaker", "Achim Nierbeck", Field.Store.YES, Field.Index.ANALYZED));
+
+        Directory dir = FSDirectory.open(new File("/tmp/testindex"));
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new GermanAnalyzer(Version.LUCENE_36));
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+        IndexWriter writer = new IndexWriter(dir, config);
+
+        writer.addDocument(luceneSolr);
+        writer.addDocument(karaf);
+
+        writer.commit();
+        writer.close();
+
+        IndexReader reader = IndexReader.open(dir);
+        IndexSearcher searcher = new IndexSearcher(reader);
+        QueryParser parser = new QueryParser(Version.LUCENE_36, "title", new GermanAnalyzer(Version.LUCENE_36));
+        Query query = parser.parse("apache");
+
+        TopDocs result = searcher.search(query, 10);
+        assertEquals(2, result.totalHits);
+
+        for(ScoreDoc scoreDoc: result.scoreDocs) {
+            Document doc = searcher.doc(scoreDoc.doc);
+            String title = doc.get("title");
+            assertTrue(title.equals("Apache Karaf") || title.equals("Integration ganz einfach mit Apache Camel"));
+        }
+
+
     }
 
     private void assertAnalyzed(String text, Analyzer analyzer, String ... expectedTokens) throws IOException {

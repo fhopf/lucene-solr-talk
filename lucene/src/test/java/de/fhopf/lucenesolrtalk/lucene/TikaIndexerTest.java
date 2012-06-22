@@ -1,5 +1,6 @@
 package de.fhopf.lucenesolrtalk.lucene;
 
+import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import de.fhopf.Result;
@@ -7,18 +8,21 @@ import de.fhopf.Talk;
 import de.fhopf.lucene.Indexer;
 import de.fhopf.lucene.Searcher;
 import de.fhopf.lucene.TikaIndexer;
+import de.fhopf.lucene.Utils;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -72,6 +76,24 @@ public class TikaIndexerTest {
 
         assertEquals(1, results.size());
 
+    }
+
+    @Test
+    public void parseWithTika() throws IOException, SAXException, TikaException {
+        // used for the slides, contains some duplication with TikaIndexer
+        File gradleTalk = new File(dataDir, "enter-the-gradle.pdf");
+        AutoDetectParser parser = new AutoDetectParser();
+
+        Metadata metadata = new Metadata();
+        metadata.add(Metadata.RESOURCE_NAME_KEY, gradleTalk.getName());
+        BodyContentHandler contentHandler = new BodyContentHandler();
+        FileInputStream in = new FileInputStream(gradleTalk);
+        parser.parse(in, contentHandler, metadata);
+        in.close();
+        String title = metadata.get(Metadata.TITLE);
+        String speaker = metadata.get(Metadata.AUTHOR);
+        String content = contentHandler.toString();
+        assertTrue(content.contains("Groovy"));
     }
 
 }
