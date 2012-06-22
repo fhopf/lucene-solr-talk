@@ -1,7 +1,11 @@
 package de.fhopf.lucenesolrtalk.web.solr;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import de.fhopf.Result;
+import de.fhopf.lucene.Utils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -29,12 +33,15 @@ public class SolrSearcher {
 
         if (query.isPresent()) {
             SolrQuery solrQuery = new SolrQuery(query.get());
+            solrQuery.setQueryType("/jugka");
             QueryResponse response = solrServer.query(solrQuery);
 
             // TODO move to a function?
             List<Result> results = new ArrayList<Result>();
             for (SolrDocument doc: response.getResults()) {
-                results.add(asResult(doc));
+                // highlighting is a map from document id to Field<=>Fragment mapping
+                Map<String, List<String>> fragments = response.getHighlighting().get(doc.getFieldValue("path"));
+                results.add(asResult(doc, fragments));
             }
 
             FacetField categoryFacets = response.getFacetField("category");
@@ -48,16 +55,39 @@ public class SolrSearcher {
 
     }
 
-    private Result asResult(SolrDocument doc) {
+    private Result asResult(SolrDocument doc, Map<String, List<String>> fragments) {
         String title = (String) doc.getFieldValue("title");
         // TODO as functions or cast correctly
         List<String> categories = toStrings(doc.getFieldValues("category"));
         List<String> speakers = toStrings(doc.getFieldValues("speaker"));
         Date date = (Date) doc.getFieldValue("date");
-        return new Result(title, "", categories, speakers, date);
+
+        List<String> titleFragments = fragments.get("title");
+        if (titleFragments != null && !titleFragments.isEmpty()) {
+            title = join(titleFragments);
+        }
+
+        List<String> contentFragments = fragments.get("content");
+        String excerpt = "";
+        if (contentFragments != null && !contentFragments.isEmpty()) {
+            excerpt = join(contentFragments);
+        }
+
+        return new Result(title, excerpt, categories, speakers, date);
+    }
+
+    private String join(List<String> tokens) {
+        // TODO use existing helper mehod
+        StringBuilder builder = new StringBuilder();
+        for (String token: tokens) {
+            builder.append(token);
+            builder.append(" ... ");
+        }
+        return builder.toString();
     }
 
     private List<String> toStrings(Collection<Object> values) {
+        // TODO add a function
         List<String> result = new ArrayList<String>();
         for (Object obj: values) {
             result.add(obj.toString());

@@ -75,10 +75,10 @@
             <#list results as result>
                 <div class="row">
                     <div class="span9">
-                        <h3>${result.title?html}</h3>
+                        <h3>${result.title}</h3>
                         <p>${result.excerpt}</p>
                         <p>Kategorien:
-                        <#list result.categoryFacet as category>
+                        <#list result.categories as category>
                             ${category?html}&nbsp;
                         </#list>
                         </p>
