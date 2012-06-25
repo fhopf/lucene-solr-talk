@@ -107,6 +107,22 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
         assertTrue(fragments.get("content").get(0).matches(".*<b style=.*>Hut</b>.*"));
     }
 
+    @Test
+    public void indexAndSearch() throws IOException, SolrServerException {
+        SolrInputDocument document = new SolrInputDocument();
+        document.addField("path", "/tmp/foo");
+        document.addField("title", "Apache Karaf");
+        document.addField("category", "OSGi");
+        server.add(document);
+        server.commit();
+
+        SolrQuery solrQuery = new SolrQuery("apache");
+        solrQuery.setQueryType("/jugka");
+        QueryResponse response = server.query(solrQuery);
+        assertEquals(1, response.getResults().size());
+        assertEquals("Apache Karaf", response.getResults().get(0).get("title"));
+    }
+
     @After
     public void clearIndex() {
         super.clearIndex();
