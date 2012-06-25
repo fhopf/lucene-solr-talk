@@ -277,11 +277,8 @@
       <analyzer> 
         <tokenizer class="solr.StandardTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_de.txt" format="snowball" enablePositionIncrements="true"/>
         <filter class="solr.GermanNormalizationFilterFactory"/>
         <filter class="solr.GermanLightStemFilterFactory"/>
-        <!-- less aggressive: <filter class="solr.GermanMinimalStemFilterFactory"/> -->
-        <!-- more aggressive: <filter class="solr.SnowballPorterFilterFactory" language="German2"/> -->
       </analyzer>
     </fieldType>
     
@@ -318,6 +315,7 @@
    <field name="category" type="string" indexed="true" stored="true" multiValued="true" omitNorms="true"/>
    <field name="date" type="date" indexed="true" stored="true"/>
    <field name="speaker" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="speaker_search" type="text_ws" indexed="true" stored="false" multiValued="true"/>
    <field name="content" type="text_de" indexed="true" stored="true"/>
 
    <field name="text" type="text_de" indexed="true" stored="false" multiValued="true"/>
@@ -349,6 +347,7 @@
    <copyField source="speaker" dest="text"/>
    <copyField source="category" dest="text"/>
    <copyField source="content" dest="text"/>
+    <copyField source="speaker" dest="speaker_search"/>
 
 
 </schema>
