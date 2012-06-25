@@ -22,7 +22,7 @@ public class SearchService extends Service<SearchConfiguration> {
     @Override
     protected void initialize(SearchConfiguration searchConfiguration, Environment environment) throws Exception {
         environment.addResource(new LuceneSearchResource(searchConfiguration.indexDir));
-        SolrServer server = new CommonsHttpSolrServer(searchConfiguration.solrUrl);
+        SolrServer server = new HttpSolrServer(searchConfiguration.solrUrl);
         environment.addResource(new SolrSearchResource(new SolrSearcher(server)));
     }
 
