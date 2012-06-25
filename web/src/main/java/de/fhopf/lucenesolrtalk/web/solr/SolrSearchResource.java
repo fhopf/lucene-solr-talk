@@ -28,10 +28,16 @@ public class SolrSearchResource {
     @GET
     @Timed
     public SearchResultView search(@QueryParam("query") Optional<String> query, @QueryParam("sort") Optional<String> sort,
-                                   @QueryParam("category") Optional<String> category, @QueryParam("fq") Set<String> fq) throws SolrServerException {
-        SolrSearchResult result = searcher.search(query, fq);
+                                   @QueryParam("fq") Set<String> fqs) throws SolrServerException {
+        SolrSearchResult result = searcher.search(query, fqs);
         Faceting faceting = new Faceting(result.categoryFacet, result.speakerFacet, result.typeFacet);
-        return new SearchResultView(query.or(""), result.results, null, faceting);
+        StringBuilder currentQuery = new StringBuilder("/solr?query=");
+        currentQuery.append(query.or(""));
+        for (String fq: fqs) {
+            currentQuery.append("&fq=");
+            currentQuery.append(fq);
+        }
+        return new SearchResultView(query.or(""), result.results, null, faceting, currentQuery.toString());
     }
 
 }

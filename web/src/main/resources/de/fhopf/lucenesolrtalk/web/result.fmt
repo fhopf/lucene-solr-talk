@@ -76,27 +76,27 @@
 
             <div class="row">
             <div class="span3">
-                <#if faceting.categoryFacet?? && faceting.categoryFacet.values??>
+                <#if faceting?? && faceting.categoryFacet?? && faceting.categoryFacet.values??>
                     <h4>Kategorien:</h4>
                     <ul>
                     <#list faceting.categoryFacet.values as cat>
-                        <li><a href="${path}?query=${query}&fq=${cat.asFilterQuery}">${cat.name} (${cat.count})</a></li>
+                        <li><a href="${currentQuery}&fq=${cat.asFilterQuery}">${cat.name} (${cat.count})</a></li>
                     </#list>
                     </ul>
                 </#if>
-                <#if faceting.speakerFacet?? && faceting.speakerFacet.values??>
+                <#if faceting?? && faceting.speakerFacet?? && faceting.speakerFacet.values??>
                     <h4>Speaker:</h4>
                     <ul>
                     <#list faceting.speakerFacet.values as count>
-                        <li><a href="${path}?query=${query}&fq=${count.asFilterQuery}">${count.name} (${count.count})</a></li>
+                        <li><a href="${currentQuery}&fq=${count.asFilterQuery}">${count.name} (${count.count})</a></li>
                     </#list>
                     </ul>
                 </#if>
-                <#if faceting.typeFacet?? && faceting.typeFacet.values??>
+                <#if faceting?? && faceting.typeFacet?? && faceting.typeFacet.values??>
                     <h4>Typ:</h4>
                     <ul>
                     <#list faceting.typeFacet.values as count>
-                        <li><a href="${path}?query=${query}&fq=${cat.asFilterQuery}">${count.name} (${count.count})</a></li>
+                        <li><a href="${currentQuery}&fq=${cat.asFilterQuery}">${count.name} (${count.count})</a></li>
                     </#list>
                     </ul>
                 </#if>

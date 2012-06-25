@@ -12,19 +12,21 @@ public class SearchResultView extends View {
     private final List<Result> results;
     private final Faceting faceting;
     private String path;
+    private String currentQuery;
 
     public SearchResultView(String query, List<Result> results, Categories categories) {
-        this(query, results, categories, null);
+        this(query, results, categories, null, null);
         // should be moved to the resource
         this.path = "/lucene/";
     }
 
-    public SearchResultView(String query, List<Result> results, Categories categories, Faceting faceting) {
+    public SearchResultView(String query, List<Result> results, Categories categories, Faceting faceting, String currentQuery) {
         super("result.fmt");
         this.query = query;
         this.results = results;
         this.categories = categories;
         this.faceting = faceting;
+        this.currentQuery = currentQuery;
         // should be moved to the resource
         this.path = "/solr/";
     }
@@ -47,5 +49,9 @@ public class SearchResultView extends View {
 
     public String getPath() {
         return path;
+    }
+
+    public String getCurrentQuery() {
+        return currentQuery;
     }
 }
