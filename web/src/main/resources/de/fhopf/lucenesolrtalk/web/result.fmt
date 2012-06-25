@@ -51,8 +51,12 @@
             </div>
 
             <div class="row">
+                <div class="span3">
+                    <a href="${path}?query=${query?html}&sort=date">Nach Datum sortieren</a>
+                </div>
                 <div class="span9">
                     <form action="${path}">
+                        <#if categories??>
                         <select name="category">
                             <option value="">---Kategorien---</option>
                             <#list categories.iterator() as category>
@@ -63,28 +67,55 @@
                                 </#if>
                             </#list>
                         </select>
+                        </#if>
                         <input type="text" name="query" value="${query?html}"/>
                         <input type="submit" value="Suchen"/>
                     </form>
                 </div>
-                <div class="span3">
-                    <a href="${path}?query=${query?html}&sort=date">Nach Datum sortieren</a>
-                </div>
             </div>
 
+            <div class="row">
+            <div class="span3">
+                <#if faceting.categoryFacet?? && faceting.categoryFacet.values??>
+                    <h4>Kategorien:</h4>
+                    <ul>
+                    <#list faceting.categoryFacet.values as cat>
+                        <li><a href="${path}?query=${query}&fq=${cat.asFilterQuery}">${cat.name} (${cat.count})</a></li>
+                    </#list>
+                    </ul>
+                </#if>
+                <#if faceting.speakerFacet?? && faceting.speakerFacet.values??>
+                    <h4>Speaker:</h4>
+                    <ul>
+                    <#list faceting.speakerFacet.values as count>
+                        <li><a href="${path}?query=${query}&fq=${count.asFilterQuery}">${count.name} (${count.count})</a></li>
+                    </#list>
+                    </ul>
+                </#if>
+                <#if faceting.typeFacet?? && faceting.typeFacet.values??>
+                    <h4>Typ:</h4>
+                    <ul>
+                    <#list faceting.typeFacet.values as count>
+                        <li><a href="${path}?query=${query}&fq=${cat.asFilterQuery}">${count.name} (${count.count})</a></li>
+                    </#list>
+                    </ul>
+                </#if>
+            </div>
+
+            <div class="span9">
             <#list results as result>
                 <div class="row">
-                    <div class="span9">
-                        <h3>${result.title}</h3>
-                        <p>${result.excerpt}</p>
-                        <p>Kategorien:
-                        <#list result.categories as category>
-                            ${category?html}&nbsp;
-                        </#list>
-                        </p>
-                    </div>
+                    <h3>${result.title}</h3>
+                    <p>${result.excerpt}</p>
+                    <p>Kategorien:
+                    <#list result.categories as category>
+                        ${category?html}&nbsp;
+                    </#list>
+                    </p>
                 </div>
             </#list>
+            </div>
+            </div>
         </div>
     </body>
 </html>

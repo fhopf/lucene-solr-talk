@@ -9,16 +9,14 @@ import de.fhopf.lucenesolrtalk.web.SearchResultView;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.solr.client.solrj.SolrServerException;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Path("/solr")
-@Produces(MediaType.TEXT_HTML)
+@Produces("text/html; charset=utf-8")
 public class SolrSearchResource {
 
     private final SolrSearcher searcher;
@@ -30,13 +28,10 @@ public class SolrSearchResource {
     @GET
     @Timed
     public SearchResultView search(@QueryParam("query") Optional<String> query, @QueryParam("sort") Optional<String> sort,
-                                   @QueryParam("category") Optional<String> category) throws SolrServerException {
-        List<Result> results = Collections.emptyList();
-        List<String> categoryValues = searcher.getAllCategories();
-        SolrSearchResult result = searcher.search(query);
-        Categories categories = new Categories(categoryValues, category.or(""));
+                                   @QueryParam("category") Optional<String> category, @QueryParam("fq") Set<String> fq) throws SolrServerException {
+        SolrSearchResult result = searcher.search(query, fq);
         Faceting faceting = new Faceting(result.categoryFacet, result.speakerFacet, result.typeFacet);
-        return new SearchResultView(query.or(""), result.results, categories, faceting);
+        return new SearchResultView(query.or(""), result.results, null, faceting);
     }
 
 }

@@ -29,19 +29,27 @@ public class SolrSearcher {
         return emptyList();
     }
 
-    public SolrSearchResult search(Optional<String> query) throws SolrServerException {
+    public SolrSearchResult search(Optional<String> query, Set<String> fq) throws SolrServerException {
 
         if (query.isPresent()) {
             SolrQuery solrQuery = new SolrQuery(query.get());
             solrQuery.setQueryType("/jugka");
+            for(String filter: fq) {
+                solrQuery.addFilterQuery(filter);
+            }
             QueryResponse response = solrServer.query(solrQuery);
 
             // TODO move to a function?
             List<Result> results = new ArrayList<Result>();
             for (SolrDocument doc: response.getResults()) {
                 // highlighting is a map from document id to Field<=>Fragment mapping
-                Map<String, List<String>> fragments = response.getHighlighting().get(doc.getFieldValue("path"));
-                results.add(asResult(doc, fragments));
+                Map<String, List<String>> fragments = Collections.emptyMap();
+                if (response.getHighlighting() != null) {
+                    fragments = response.getHighlighting().get(doc.getFieldValue("path"));
+                }
+                Result result = asResult(doc, fragments);
+                results.add(result);
+
             }
 
             FacetField categoryFacets = response.getFacetField("category");
