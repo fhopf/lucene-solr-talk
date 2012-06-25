@@ -32,3 +32,16 @@ task copyToLib(type: Copy) {
     into "$buildDir/output/lib"
     from configurations.runtime
 }
+
+task indexProperties(type: JavaExec) {
+    main = 'de.fhopf.lucene.Indexer'
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['/tmp/myindex','data/properties/']
+}
+
+task indexSlides(type: JavaExec) {
+    main = 'de.fhopf.lucene.TikaIndexer'
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['/tmp/myindex','data/slides/']
+}
+
