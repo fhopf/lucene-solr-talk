@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Path("/lucene")
-@Produces(MediaType.TEXT_HTML)
+@Produces("text/html; charset=utf-8")
 public class LuceneSearchResource {
 
     private final Searcher searcher;

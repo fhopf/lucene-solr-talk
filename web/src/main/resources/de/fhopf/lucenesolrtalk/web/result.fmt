@@ -55,7 +55,7 @@
                     <a href="${path}?query=${query?html}&sort=date">Nach Datum sortieren</a>
                 </div>
                 <div class="span9">
-                    <form action="${path}">
+                    <form action="${path}" class="form-search">
                         <#if categories??>
                         <select name="category">
                             <option value="">---Kategorien---</option>
@@ -68,9 +68,10 @@
                             </#list>
                         </select>
                         </#if>
-                        <input type="text" name="query" value="${query?html}"/>
-                        <input type="submit" value="Suchen"/>
+                        <input type="text" class="search-query span3" name="query" value="${query?html}"/>
+                        <input type="submit" class="btn" value="Suchen"/>
                     </form>
+
                 </div>
             </div>
 
