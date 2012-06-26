@@ -36,3 +36,8 @@ configure(install.repositories.mavenInstaller) {
     }
 }
 
+task index(type: JavaExec) {
+    main = 'de.fhopf.lucenesolrtalk.solr.Indexer'
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['http://localhost:8082/solr/','../lucene/data/properties/']
+}
