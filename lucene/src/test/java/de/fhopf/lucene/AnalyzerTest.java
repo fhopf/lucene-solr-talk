@@ -80,23 +80,32 @@ public class AnalyzerTest {
 
     @Test
     public void indexExampleTalks() throws IOException, ParseException {
-        Document luceneSolr = new Document();
-        luceneSolr.add(new Field("title", "Integration ganz einfach mit Apache Camel", Field.Store.YES, Field.Index.ANALYZED));
-        luceneSolr.add(new Field("date", "20120404", Field.Store.NO, Field.Index.ANALYZED));
-        luceneSolr.add(new Field("speaker", "Christian Schneider", Field.Store.YES, Field.Index.ANALYZED));
+        
+	Document camel = new Document();
+        camel.add(new Field("title", "Integration ganz einfach mit Apache Camel", 
+				Field.Store.YES, Field.Index.ANALYZED));
+        camel.add(new Field("date", "20120404", Field.Store.NO, 
+				Field.Index.ANALYZED));
+        camel.add(new Field("speaker", "Christian Schneider", Field.Store.YES, 
+				Field.Index.ANALYZED));
 
         Document karaf = new Document();
-        karaf.add(new Field("title", "Apache Karaf", Field.Store.YES, Field.Index.ANALYZED));
-        karaf.add(new Field("date", "20120424", Field.Store.NO, Field.Index.ANALYZED));
-        karaf.add(new Field("speaker", "Christian Schneider", Field.Store.YES, Field.Index.ANALYZED));
-        karaf.add(new Field("speaker", "Achim Nierbeck", Field.Store.YES, Field.Index.ANALYZED));
+        karaf.add(new Field("title", "Apache Karaf", Field.Store.YES, 
+				Field.Index.ANALYZED));
+        karaf.add(new Field("date", "20120424", Field.Store.NO, 
+				Field.Index.ANALYZED));
+        karaf.add(new Field("speaker", "Christian Schneider", Field.Store.YES, 
+				Field.Index.ANALYZED));
+        karaf.add(new Field("speaker", "Achim Nierbeck", Field.Store.YES, 
+				Field.Index.ANALYZED));
 
         Directory dir = FSDirectory.open(new File("/tmp/testindex"));
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new GermanAnalyzer(Version.LUCENE_36));
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, 
+					new GermanAnalyzer(Version.LUCENE_36));
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         IndexWriter writer = new IndexWriter(dir, config);
 
-        writer.addDocument(luceneSolr);
+        writer.addDocument(camel);
         writer.addDocument(karaf);
 
         writer.commit();
@@ -104,7 +113,8 @@ public class AnalyzerTest {
 
         IndexReader reader = IndexReader.open(dir);
         IndexSearcher searcher = new IndexSearcher(reader);
-        QueryParser parser = new QueryParser(Version.LUCENE_36, "title", new GermanAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, "title", 
+					new GermanAnalyzer(Version.LUCENE_36));
         Query query = parser.parse("apache");
 
         TopDocs result = searcher.search(query, 10);
@@ -113,7 +123,8 @@ public class AnalyzerTest {
         for(ScoreDoc scoreDoc: result.scoreDocs) {
             Document doc = searcher.doc(scoreDoc.doc);
             String title = doc.get("title");
-            assertTrue(title.equals("Apache Karaf") || title.equals("Integration ganz einfach mit Apache Camel"));
+            assertTrue(title.equals("Apache Karaf") 
+			|| title.equals("Integration ganz einfach mit Apache Camel"));
         }
 
 
@@ -144,6 +155,14 @@ public class AnalyzerTest {
             assertTrue(term.text(), expectedTokenList.contains(term.text()));
         }
         assertEquals(expectedTokens.length, count);
+    }
+
+    @Test
+    public void testQueryStructure() throws ParseException {
+        String query = "title:Apache AND speaker:schneyder~ AND date:[20120401 TO 20120430]";
+        QueryParser parser = new QueryParser(Version.LUCENE_36, "content", new GermanAnalyzer(Version.LUCENE_36));
+        Query parsed = parser.parse(query);
+        System.out.println(parsed.toString());
     }
 
     private List<String> getTokens(TokenStream tokenStream) throws IOException {

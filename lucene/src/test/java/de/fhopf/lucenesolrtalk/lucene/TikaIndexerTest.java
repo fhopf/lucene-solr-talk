@@ -81,19 +81,23 @@ public class TikaIndexerTest {
     @Test
     public void parseWithTika() throws IOException, SAXException, TikaException {
         // used for the slides, contains some duplication with TikaIndexer
-        File gradleTalk = new File(dataDir, "enter-the-gradle.pdf");
-        AutoDetectParser parser = new AutoDetectParser();
+        File file = new File(dataDir, "enter-the-gradle.pdf");
 
+        FileInputStream in = new FileInputStream(file);
+        AutoDetectParser parser = new AutoDetectParser();
         Metadata metadata = new Metadata();
-        metadata.add(Metadata.RESOURCE_NAME_KEY, gradleTalk.getName());
+        metadata.add(Metadata.RESOURCE_NAME_KEY, file.getName());
         BodyContentHandler contentHandler = new BodyContentHandler();
-        FileInputStream in = new FileInputStream(gradleTalk);
+
         parser.parse(in, contentHandler, metadata);
-        in.close();
+
         String title = metadata.get(Metadata.TITLE);
-        String speaker = metadata.get(Metadata.AUTHOR);
+        String author = metadata.get(Metadata.AUTHOR);
         String content = contentHandler.toString();
+
+
         assertTrue(content.contains("Groovy"));
+        in.close();
     }
 
 }
