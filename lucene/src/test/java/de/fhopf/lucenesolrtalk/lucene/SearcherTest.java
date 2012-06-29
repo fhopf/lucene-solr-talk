@@ -1,12 +1,9 @@
-package de.fhopf.lucene;
+package de.fhopf.lucenesolrtalk.lucene;
 
 import com.google.common.base.Optional;
-import de.fhopf.Result;
-import de.fhopf.Talk;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.Term;
+import de.fhopf.lucenesolrtalk.Result;
+import de.fhopf.lucenesolrtalk.Talk;
 import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Before;

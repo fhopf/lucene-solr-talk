@@ -1,4 +1,4 @@
-package de.fhopf;
+package de.fhopf.lucenesolrtalk;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

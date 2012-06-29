@@ -1,4 +1,4 @@
-package de.fhopf.lucene;
+package de.fhopf.lucenesolrtalk.lucene;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 public class Utils {

@@ -1,4 +1,4 @@
-package de.fhopf;
+package de.fhopf.lucenesolrtalk;
 
 import java.util.Date;
 import java.util.List;

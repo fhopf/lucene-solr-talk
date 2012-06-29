@@ -1,10 +1,8 @@
-package de.fhopf.lucene;
+package de.fhopf.lucenesolrtalk.lucene;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import de.fhopf.Result;
-import org.apache.lucene.analysis.CachingTokenFilter;
+import de.fhopf.lucenesolrtalk.Result;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.document.DateTools;

@@ -1,8 +1,8 @@
-package de.fhopf.lucene;
+package de.fhopf.lucenesolrtalk.lucene;
 
 import com.google.common.collect.Collections2;
-import de.fhopf.Talk;
-import de.fhopf.TalkFromFile;
+import de.fhopf.lucenesolrtalk.Talk;
+import de.fhopf.lucenesolrtalk.TalkFromFile;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;

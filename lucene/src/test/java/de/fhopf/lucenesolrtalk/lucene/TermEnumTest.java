@@ -1,7 +1,5 @@
 package de.fhopf.lucenesolrtalk.lucene;
 
-import de.fhopf.lucene.Utils;
-import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

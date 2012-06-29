@@ -1,4 +1,4 @@
-package de.fhopf.lucene;
+package de.fhopf.lucenesolrtalk.lucene;
 
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
@@ -6,7 +6,6 @@ import org.apache.lucene.analysis.de.GermanLightStemFilter;
 import org.apache.lucene.analysis.de.GermanNormalizationFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.*;
@@ -26,7 +25,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -34,13 +34,13 @@ task copyToLib(type: Copy) {
 }
 
 task indexProperties(type: JavaExec) {
-    main = 'de.fhopf.lucene.Indexer'
+    main = 'de.fhopf.lucenesolrtalk.lucene.Indexer'
     classpath = sourceSets.main.runtimeClasspath
     args = ['/tmp/myindex','data/properties/']
 }
 
 task indexSlides(type: JavaExec) {
-    main = 'de.fhopf.lucene.TikaIndexer'
+    main = 'de.fhopf.lucenesolrtalk.lucene.TikaIndexer'
     classpath = sourceSets.main.runtimeClasspath
     args = ['/tmp/myindex','data/slides/']
 }

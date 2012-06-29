@@ -1,7 +1,7 @@
-package de.fhopf.lucene;
+package de.fhopf.lucenesolrtalk.lucene;
 
 import com.google.common.base.Optional;
-import de.fhopf.Talk;
+import de.fhopf.lucenesolrtalk.Talk;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.tika.exception.TikaException;
