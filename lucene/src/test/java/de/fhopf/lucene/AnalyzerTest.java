@@ -20,6 +20,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -158,6 +159,7 @@ public class AnalyzerTest {
     }
 
     @Test
+    @Ignore("Doesn't really test anything but was used for inspecting the query")
     public void testQueryStructure() throws ParseException {
         String query = "title:Apache AND speaker:schneyder~ AND date:[20120401 TO 20120430]";
         QueryParser parser = new QueryParser(Version.LUCENE_36, "content", new GermanAnalyzer(Version.LUCENE_36));

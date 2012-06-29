@@ -2,11 +2,16 @@ package de.fhopf.lucene;
 
 import de.fhopf.Talk;
 import de.fhopf.TalkFromFileTest;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.ParallelReader;
+import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.*;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,5 +71,61 @@ public class IndexerTest {
 
         assertDocumentCount(1);
     }
+
+    @Test
+    public void transactionsAreNotIsolated() throws IOException, InterruptedException {
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new KeywordAnalyzer());
+        final IndexWriter writer = new IndexWriter(directory, config);
+        // add a dummy document so the index is created
+        Document dummy = new Document();
+        dummy.add(new Field("name", "value", Field.Store.NO, Field.Index.ANALYZED));
+        writer.addDocument(dummy);
+        writer.commit();
+
+        Thread t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Document doc1 = new Document();
+                doc1.add(new Field("key", "doc1", Field.Store.NO, Field.Index.ANALYZED));
+                try {
+                    writer.addDocument(doc1);
+                    // no commit
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t1.start();
+        t1.join();
+
+        // no result as there was no commit
+        IndexSearcher searcher = new IndexSearcher(IndexReader.open(directory));
+        TopDocs docs = searcher.search(new TermQuery(new Term("key", "doc1")), 10);
+        assertEquals(0, docs.totalHits);
+
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Document doc2 = new Document();
+                doc2.add(new Field("key", "doc2", Field.Store.NO, Field.Index.ANALYZED));
+                try {
+                    writer.addDocument(doc2);
+                    writer.commit();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t2.start();
+        t2.join();
+
+        // both documents are committed
+        searcher = new IndexSearcher(IndexReader.open(directory));
+        docs = searcher.search(new TermQuery(new Term("key", "doc1")), 10);
+        assertEquals(1, docs.totalHits);
+        docs = searcher.search(new TermQuery(new Term("key", "doc2")), 10);
+        assertEquals(1, docs.totalHits);
+    }
+
 
 }
