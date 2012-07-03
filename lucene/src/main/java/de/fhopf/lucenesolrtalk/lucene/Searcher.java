@@ -10,6 +10,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.queryParser.MultiFieldQueryParser;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
@@ -79,16 +80,16 @@ public class Searcher {
     }
 
     private String extractExcerpt(Document doc, Query query) {
-        TokenStream stream = TokenSources.getTokenStream("all", doc.get("all"),
+        TokenStream stream = TokenSources.getTokenStream("content", doc.get("content"),
                 new GermanAnalyzer(Version.LUCENE_36));
-        QueryScorer scorer = new QueryScorer(query, "all");
+        QueryScorer scorer = new QueryScorer(query, "content");
         Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 100);
 
         Highlighter highlighter = new Highlighter(scorer);
         highlighter.setTextFragmenter(fragmenter);
 
         String excerpt = "";
-        String content = doc.get("all");
+        String content = doc.get("content");
 
         try {
             String[] fragments = highlighter.getBestFragments(stream, content, 5);
@@ -113,7 +114,7 @@ public class Searcher {
     }
 
     private List<Result> search(String query, Optional<String> category, Optional<Sort> sort) throws ParseException {
-        QueryParser queryParser = new QueryParser(Version.LUCENE_36, "all", new GermanAnalyzer(Version.LUCENE_36));
+        QueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_36, new String[] {"title", "content", "category", "speaker"}, new GermanAnalyzer(Version.LUCENE_36));
         Query actualQuery = queryParser.parse(query);
         Optional<Filter> filter = Optional.absent();
         if (!category.or("").isEmpty()) {
