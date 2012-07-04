@@ -717,7 +717,7 @@
             <str name="q.alt">*:*</str>
             <str name="defType">edismax</str>
             <str name="qf">content title category^0.8 speaker_search^0.8</str>
-	    <str name="bf">content title</str>
+	    <!--<str name="bf">content title</str>-->
 	    <!--<str name="fl">title,category,speaker</str>-->
             <str name="facet">on</str>
             <str name="facet.field">category</str>
