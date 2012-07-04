@@ -8,7 +8,6 @@ import de.fhopf.lucenesolrtalk.web.lucene.LuceneSearchResource;
 import de.fhopf.lucenesolrtalk.web.solr.SolrSearchResource;
 import de.fhopf.lucenesolrtalk.web.solr.SolrSearcher;
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
 public class SearchService extends Service<SearchConfiguration> {

@@ -1,11 +1,7 @@
 package de.fhopf.lucenesolrtalk.web.solr;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import de.fhopf.Result;
-import de.fhopf.lucene.Utils;
+import de.fhopf.lucenesolrtalk.Result;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;

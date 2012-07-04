@@ -1,8 +1,8 @@
 package de.fhopf.lucenesolrtalk.solr;
 
 import com.google.common.collect.Collections2;
-import de.fhopf.Talk;
-import de.fhopf.TalkFromFile;
+import de.fhopf.lucenesolrtalk.Talk;
+import de.fhopf.lucenesolrtalk.TalkFromFile;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;

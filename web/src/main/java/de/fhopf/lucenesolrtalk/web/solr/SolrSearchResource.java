@@ -2,17 +2,14 @@ package de.fhopf.lucenesolrtalk.web.solr;
 
 import com.google.common.base.Optional;
 import com.yammer.metrics.annotation.Timed;
-import de.fhopf.Result;
-import de.fhopf.lucenesolrtalk.web.Categories;
 import de.fhopf.lucenesolrtalk.web.Faceting;
 import de.fhopf.lucenesolrtalk.web.SearchResultView;
-import org.apache.lucene.queryParser.ParseException;
 import org.apache.solr.client.solrj.SolrServerException;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.List;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import java.util.Set;
 
 @Path("/solr")

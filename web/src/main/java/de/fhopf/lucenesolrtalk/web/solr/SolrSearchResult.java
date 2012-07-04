@@ -1,6 +1,6 @@
 package de.fhopf.lucenesolrtalk.web.solr;
 
-import de.fhopf.Result;
+import de.fhopf.lucenesolrtalk.Result;
 import org.apache.solr.client.solrj.response.FacetField;
 
 import java.util.List;

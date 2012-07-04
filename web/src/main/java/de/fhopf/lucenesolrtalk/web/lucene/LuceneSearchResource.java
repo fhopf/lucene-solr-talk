@@ -2,11 +2,10 @@ package de.fhopf.lucenesolrtalk.web.lucene;
 
 import com.google.common.base.Optional;
 import com.yammer.metrics.annotation.Timed;
-import de.fhopf.Result;
-import de.fhopf.lucene.Searcher;
+import de.fhopf.lucenesolrtalk.Result;
+import de.fhopf.lucenesolrtalk.lucene.Searcher;
 import de.fhopf.lucenesolrtalk.web.Categories;
 import de.fhopf.lucenesolrtalk.web.SearchResultView;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.store.FSDirectory;
 
@@ -14,10 +13,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
