@@ -101,6 +101,7 @@
                     </#list>
                     </ul>
                 </#if>
+		&nbsp;
             </div>
 
             <div class="span9">
