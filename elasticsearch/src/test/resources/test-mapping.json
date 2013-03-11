@@ -1,0 +1,10 @@
+{
+    "document": {
+
+        "properties": {
+            "test":                { "type": "string", "analyzer": "german" }
+        }
+        
+    }
+    
+}
