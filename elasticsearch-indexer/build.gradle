@@ -1,0 +1,34 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+
+dependencies {
+//    compile group: 'de.fhopf.lucenesolrtalk', name: 'lucene', version: '1.0-SNAPSHOT', transitive: false
+    compile("de.fhopf.lucenesolrtalk:lucene:1.0-SNAPSHOT") {
+        exclude group: 'org.apache.lucene'
+        exclude group: 'org.apache.tika'
+    }
+    compile group: 'org.elasticsearch', name: 'elasticsearch', version: '0.20.5'
+    //compile group: 'com.google.guava', name: 'guava', version: '10.0.1'
+    //runtime group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.4'
+    testCompile group: 'junit', name: 'junit', version: '4.10'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.0'
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "de.fhopf.lucenesolrtalk.elasticsearch.Indexer")
+    }
+}
+
+task index(type: JavaExec) {
+    main = 'de.fhopf.lucenesolrtalk.elasticsearch.Indexer'
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['../lucene/data/properties/']
+    //debug = true
+}
