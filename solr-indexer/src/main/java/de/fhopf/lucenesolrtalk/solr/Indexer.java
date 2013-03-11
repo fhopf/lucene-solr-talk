@@ -44,6 +44,10 @@ public class Indexer {
         server.add(docs);
         server.commit();
     }
+    
+    public void clearIndex() throws SolrServerException, IOException {
+        server.deleteByQuery("*:*");
+    }
 
     public static void main(String [] args) throws IOException, SolrServerException {
 
@@ -61,6 +65,7 @@ public class Indexer {
         Collection<Talk> talks = Collections2.transform(files, new TalkFromFile());
 
         Indexer indexer = new Indexer(server);
+        indexer.clearIndex();
         indexer.index(talks);
     }
 
