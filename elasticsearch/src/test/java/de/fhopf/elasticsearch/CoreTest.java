@@ -2,10 +2,10 @@ package de.fhopf.elasticsearch;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import de.fhopf.elasticsearch.test.ElasticsearchTestNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.junit.Test;
