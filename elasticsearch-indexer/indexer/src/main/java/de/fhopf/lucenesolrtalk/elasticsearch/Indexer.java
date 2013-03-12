@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -24,16 +25,16 @@ import org.elasticsearch.node.NodeBuilder;
  */
 public class Indexer {
 
-    private final Node node;
     private static final String INDEX = "bedcon";
     private static final String TYPE = "talk";
+    private final Client client;
 
-    public Indexer(Node node) {
-        this.node = node;
+    public Indexer(Client client) {
+        this.client = client;
     }
 
     public void index(Collection<Talk> talks) throws IOException {
-        BulkRequestBuilder bulk = node.client().prepareBulk();
+        BulkRequestBuilder bulk = client.prepareBulk();
 
         for (Talk talk : talks) {
             XContentBuilder sourceBuilder = XContentFactory.jsonBuilder().startObject()
@@ -51,13 +52,13 @@ public class Indexer {
     }
 
     public void prepareIndex() throws IOException {
-        boolean indexExists = node.client().admin().indices().prepareExists(INDEX).execute().actionGet().exists();
+        boolean indexExists = client.admin().indices().prepareExists(INDEX).execute().actionGet().exists();
         if (indexExists) {
             // delete the whole index as during development it is likely that the types will change
             //node.client().prepareDeleteByQuery(INDEX).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
-            node.client().admin().indices().prepareDelete(INDEX).execute().actionGet();
+            client.admin().indices().prepareDelete(INDEX).execute().actionGet();
         }
-        node.client().admin().indices().prepareCreate(INDEX).execute().actionGet();
+        client.admin().indices().prepareCreate(INDEX).execute().actionGet();
         // TODO how to make the german analyzer the default?
 //        XContentBuilder builder = XContentFactory.jsonBuilder().
 //                startObject().
@@ -67,7 +68,7 @@ public class Indexer {
 //                            startObject("title").field("store", "yes").field("analyzer", "german").endObject().
 //                            startObject("date");
         
-        node.client().admin().indices().preparePutMapping(INDEX);
+        client.admin().indices().preparePutMapping(INDEX);
     }
 
     public static void main(String[] args) throws IOException {
@@ -85,7 +86,7 @@ public class Indexer {
                 .put("http.enabled", "false");
         Node client = NodeBuilder.nodeBuilder().client(true).settings(elasticsearchSettings).node();
 
-        Indexer indexer = new Indexer(client);
+        Indexer indexer = new Indexer(client.client());
         indexer.prepareIndex();
         indexer.index(talks);
         client.close();
