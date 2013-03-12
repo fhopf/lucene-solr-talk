@@ -25,8 +25,8 @@ import org.elasticsearch.node.NodeBuilder;
  */
 public class Indexer {
 
-    private static final String INDEX = "bedcon";
-    private static final String TYPE = "talk";
+    static final String INDEX = "bedcon";
+    static final String TYPE = "talk";
     private final Client client;
 
     public Indexer(Client client) {
@@ -44,7 +44,7 @@ public class Indexer {
                     .field("content", talk.content)
                     .field("category", talk.categories)
                     .field("speaker", talk.speakers);
-            IndexRequest request = new IndexRequest(INDEX, TYPE).source(sourceBuilder);
+            IndexRequest request = new IndexRequest(INDEX, TYPE).id(talk.path).source(sourceBuilder);
             //node.client().index(request).actionGet();
             bulk.add(request.source(sourceBuilder));
         }
@@ -60,15 +60,18 @@ public class Indexer {
         }
         client.admin().indices().prepareCreate(INDEX).execute().actionGet();
         // TODO how to make the german analyzer the default?
-//        XContentBuilder builder = XContentFactory.jsonBuilder().
-//                startObject().
-//                    startObject(TYPE).
-//                        startObject("properties").
-//                            startObject("path").field("analyzed", "not_analyzed").endObject().
-//                            startObject("title").field("store", "yes").field("analyzer", "german").endObject().
-//                            startObject("date");
+        XContentBuilder builder = XContentFactory.jsonBuilder().
+                startObject().
+                    startObject(TYPE).
+                        startObject("properties").
+                            startObject("path").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
+                            startObject("title").field("type", "string").field("store", "yes").field("analyzer", "german").endObject().
+                            //startObject("date").field("type", "string").endObject().
+                        endObject().
+                    endObject().
+                endObject();
         
-        client.admin().indices().preparePutMapping(INDEX);
+        client.admin().indices().preparePutMapping(INDEX).setType(TYPE).setSource(builder).execute().actionGet();
     }
 
     public static void main(String[] args) throws IOException {
