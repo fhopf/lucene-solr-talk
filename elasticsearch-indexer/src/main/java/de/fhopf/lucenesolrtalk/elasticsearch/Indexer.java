@@ -6,6 +6,7 @@ import de.fhopf.lucenesolrtalk.TalkFromFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequest;
@@ -15,6 +16,8 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+
+//import static org.elasticsearch.
 
 /**
  * Indexes files in Solr.
@@ -31,33 +34,43 @@ public class Indexer {
 
     public void index(Collection<Talk> talks) throws IOException {
         BulkRequestBuilder bulk = node.client().prepareBulk();
-        
-        for (Talk talk: talks) {
+
+        for (Talk talk : talks) {
             XContentBuilder sourceBuilder = XContentFactory.jsonBuilder().startObject()
-                                            .field("path", talk.path)
-                                            .field("title", talk.title)
-                                            .field("date", talk.date)
-                                            .field("content", talk.content)
-                                            .field("category", talk.categories)
-                                            .field("speaker", talk.speakers);
+                    .field("path", talk.path)
+                    .field("title", talk.title)
+                    .field("date", talk.date)
+                    .field("content", talk.content)
+                    .field("category", talk.categories)
+                    .field("speaker", talk.speakers);
             IndexRequest request = new IndexRequest(INDEX, TYPE).source(sourceBuilder);
             //node.client().index(request).actionGet();
             bulk.add(request.source(sourceBuilder));
         }
         bulk.execute().actionGet();
     }
-    
-    public void prepareIndex() {
+
+    public void prepareIndex() throws IOException {
         boolean indexExists = node.client().admin().indices().prepareExists(INDEX).execute().actionGet().exists();
         if (indexExists) {
-            node.client().prepareDeleteByQuery(INDEX).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
-        } else {
-            // TODO add mapping for german
-            node.client().admin().indices().prepareCreate(INDEX).execute().actionGet();
+            // delete the whole index as during development it is likely that the types will change
+            //node.client().prepareDeleteByQuery(INDEX).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
+            node.client().admin().indices().prepareDelete(INDEX).execute().actionGet();
         }
+        node.client().admin().indices().prepareCreate(INDEX).execute().actionGet();
+        // TODO how to make the german analyzer the default?
+//        XContentBuilder builder = XContentFactory.jsonBuilder().
+//                startObject().
+//                    startObject(TYPE).
+//                        startObject("properties").
+//                            startObject("path").field("analyzed", "not_analyzed").endObject().
+//                            startObject("title").field("store", "yes").field("analyzer", "german").endObject().
+//                            startObject("date");
+        
+        node.client().admin().indices().preparePutMapping(INDEX);
     }
 
-    public static void main(String [] args) throws IOException  {
+    public static void main(String[] args) throws IOException {
 
         if (args.length != 1) {
             System.out.println("Usage: java " + Indexer.class.getCanonicalName() + " <dataDir>");
@@ -67,15 +80,14 @@ public class Indexer {
         List<File> files = Arrays.asList(new File(args[0]).listFiles());
 
         Collection<Talk> talks = Collections2.transform(files, new TalkFromFile());
-        
+
         ImmutableSettings.Builder elasticsearchSettings = ImmutableSettings.settingsBuilder()
                 .put("http.enabled", "false");
         Node client = NodeBuilder.nodeBuilder().client(true).settings(elasticsearchSettings).node();
-        
+
         Indexer indexer = new Indexer(client);
         indexer.prepareIndex();
         indexer.index(talks);
         client.close();
     }
-
 }
