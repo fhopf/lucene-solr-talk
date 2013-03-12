@@ -14,6 +14,11 @@ public class SearchResultView extends View {
     private String path;
     private String currentQuery;
 
+    public SearchResultView(String query, List<Result> results) {
+        this(query, results, null, null, null);
+        this.path = "/elasticsearch/";
+    }
+    
     public SearchResultView(String query, List<Result> results, Categories categories) {
         this(query, results, categories, null, null);
         // should be moved to the resource

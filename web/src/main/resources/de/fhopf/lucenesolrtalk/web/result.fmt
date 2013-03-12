@@ -40,9 +40,15 @@
                                 <#if path = "/lucene/">
                                     <li class="active"><a href="/lucene/">Lucene</a></li>
                                     <li><a href="/solr/">Solr</a></li>
-                                <#else>
+                                    <li><a href="/elasticsearch/">ElasticSearch</a></li>
+                                <#elseif path = "/solr/">
                                     <li><a href="/lucene/">Lucene</a></li>
                                     <li class="active"><a href="/solr/">Solr</a></li>
+                                    <li><a href="/elasticsearch/">ElasticSearch</a></li>
+                                <#else>
+                                    <li><a href="/lucene/">Lucene</a></li>
+                                    <li><a href="/solr/">Solr</a></li>
+                                    <li class="active"><a href="/elasticsearch/">ElasticSearch</a></li>
                                 </#if>
                             </ul>
                         </div><!--/.nav-collapse -->
