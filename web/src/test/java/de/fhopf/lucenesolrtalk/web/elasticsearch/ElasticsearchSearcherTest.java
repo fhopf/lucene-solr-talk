@@ -21,42 +21,82 @@ public class ElasticsearchSearcherTest {
 
     @Rule
     public ElasticsearchTestNode testNode = new ElasticsearchTestNode();
-    
     private ElasticsearchSearcher searcher;
     private Indexer indexer;
-    
     private Talk talk = new Talk("/foo/bar", "Testen mit Elasticsearch", Arrays.asList("Florian Hopf"),
             new Date(), "Foo Bar Content", Arrays.asList("Test", "Elasticsearch"));
-    
+
     @Before
     public void init() throws IOException {
         searcher = new ElasticsearchSearcher(testNode.getClient());
         indexer = new Indexer(testNode.getClient());
         indexer.prepareIndex();
     }
-    
+
     @Test
     public void zeroResultsOnEmptyIndex() {
         assertTrue(searcher.search("").isEmpty());
     }
-    
+
     @Test
     public void matchInTitleIsFound() throws IOException {
         indexExampleTalk();
         assertEquals(1, searcher.search("test").size());
     }
-    
+
     @Test
     public void phraseMatchInTitle() throws IOException {
         indexExampleTalk();
         assertEquals(1, searcher.search("mit Elasticsearch").size());
     }
-    
+
     @Test
     public void titleIsStored() throws IOException {
         indexExampleTalk();
         Result result = searcher.search("test").get(0);
         assertEquals(talk.title, result.getTitle());
+    }
+
+    @Test
+    public void emptyQueryReturnsDocuments() throws IOException {
+        indexExampleTalk();
+        assertEquals(1, searcher.search("").size());
+    }
+    
+    @Test
+    public void categoriesAreAvailable() throws IOException {
+        Result result = indexAndSearchSingle("test");
+        assertEquals(talk.categories.size(), result.getCategories().size());
+        for (String category: talk.categories) {
+            assertTrue(result.getCategories().contains(category));
+        }
+    }
+    
+    @Test
+    public void speakersAreAvailable() throws IOException {
+        Result result = indexAndSearchSingle("test");
+        assertEquals(talk.speakers.size(), result.getSpeakers().size());
+        for (String speaker: talk.speakers) {
+            assertTrue(speaker + result.getSpeakers(), result.getSpeakers().contains(speaker));
+        }
+        
+    }
+    
+    @Test
+    public void dateIsAvailable() throws IOException {
+        Result result = indexAndSearchSingle("test");
+        assertEquals(talk.date, result.getDate());
+    }
+    
+    @Test
+    public void excerptIsAvailable() throws IOException {
+        Result result = indexAndSearchSingle("content");
+        assertTrue(result.getExcerpt().contains("Content"));
+    }
+    
+    private Result indexAndSearchSingle(String term) throws IOException {
+        indexExampleTalk();
+        return searcher.search(term).get(0);
     }
 
     private void indexExampleTalk() throws IOException {
