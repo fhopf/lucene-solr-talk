@@ -4,9 +4,12 @@ import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.bundles.AssetsBundle;
 import com.yammer.dropwizard.config.Environment;
 import com.yammer.dropwizard.views.ViewBundle;
+import de.fhopf.lucenesolrtalk.web.elasticsearch.ElasticsearchHealthCheck;
 import de.fhopf.lucenesolrtalk.web.elasticsearch.ElasticsearchResource;
 import de.fhopf.lucenesolrtalk.web.elasticsearch.ElasticsearchSearcher;
+import de.fhopf.lucenesolrtalk.web.lucene.LuceneHealthCheck;
 import de.fhopf.lucenesolrtalk.web.lucene.LuceneSearchResource;
+import de.fhopf.lucenesolrtalk.web.solr.SolrHealthCheck;
 import de.fhopf.lucenesolrtalk.web.solr.SolrSearchResource;
 import de.fhopf.lucenesolrtalk.web.solr.SolrSearcher;
 import org.apache.solr.client.solrj.SolrServer;
@@ -29,6 +32,9 @@ public class SearchService extends Service<SearchConfiguration> {
         environment.addResource(new SolrSearchResource(new SolrSearcher(server)));
         Client esClient = NodeBuilder.nodeBuilder().client(true).node().client();
         environment.addResource(new ElasticsearchResource(new ElasticsearchSearcher(esClient)));        
+        environment.addHealthCheck(new ElasticsearchHealthCheck(esClient));
+        environment.addHealthCheck(new LuceneHealthCheck(searchConfiguration.indexDir));
+        environment.addHealthCheck(new SolrHealthCheck(server));
     }
 
     public static void main(String [] args) throws Exception {
