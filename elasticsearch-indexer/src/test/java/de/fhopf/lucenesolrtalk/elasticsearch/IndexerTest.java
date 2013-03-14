@@ -10,6 +10,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,17 +61,14 @@ public class IndexerTest {
         assertEquals(talk.path, hit.getId());
     }
     
-    @Ignore("Can only be tested in searcher, this is a concept that depends on the search query")
     @Test
-    public void relevantFieldsAreStored() throws IOException {
-        // assert that all the fields we need in the result list are stored correctly
-        // path, title, categories, speaker
+    public void categoriesAreMultivalued() throws IOException {
         prepareIndexAndIndex(talk);
         SearchHit hit = findAll().hits().getAt(0);
-
-        assertEquals(talk.path, hit.field("path").value());
+        SearchHitField category = hit.field("category");
+        assertEquals(talk.categories.size(), category.getValues().size());
     }
-
+    
     private void prepareIndexAndIndex(Talk talk) throws IOException {
         indexer.prepareIndex();
         indexer.index(Arrays.asList(talk));
@@ -93,6 +91,6 @@ public class IndexerTest {
     }
 
     private SearchResponse findAll() throws ElasticSearchException {
-        return testNode.getClient().prepareSearch(Indexer.INDEX).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
+        return testNode.getClient().prepareSearch(Indexer.INDEX).addFields("title", "category").setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
     }
 }

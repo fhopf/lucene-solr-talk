@@ -42,8 +42,8 @@ public class Indexer {
                     .field("title", talk.title)
                     .field("date", talk.date)
                     .field("content", talk.content)
-                    .field("category", talk.categories)
-                    .field("speaker", talk.speakers);
+                    .array("category", talk.categories.toArray(new String[0]))
+                    .array("speaker", talk.speakers.toArray(new String[0]));
             IndexRequest request = new IndexRequest(INDEX, TYPE).id(talk.path).source(sourceBuilder);
             //node.client().index(request).actionGet();
             bulk.add(request.source(sourceBuilder));
@@ -66,7 +66,9 @@ public class Indexer {
                         startObject("properties").
                             startObject("path").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
                             startObject("title").field("type", "string").field("store", "yes").field("analyzer", "german").endObject().
-                            //startObject("date").field("type", "string").endObject().
+                            startObject("category").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
+                            startObject("speaker").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
+                            startObject("date").field("type", "date").field("store", "yes").field("analyzed", "not_analyzed").endObject().
                         endObject().
                     endObject().
                 endObject();
