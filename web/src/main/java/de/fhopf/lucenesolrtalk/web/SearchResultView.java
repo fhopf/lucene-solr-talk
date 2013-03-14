@@ -11,29 +11,21 @@ public class SearchResultView extends View {
     private final String query;
     private final List<Result> results;
     private final Faceting faceting;
-    private String path;
+    private final String path;
     private String currentQuery;
 
-    public SearchResultView(String query, List<Result> results) {
-        this(query, results, null, null, null);
-        this.path = "/elasticsearch/";
-    }
-    
-    public SearchResultView(String query, List<Result> results, Categories categories) {
-        this(query, results, categories, null, null);
-        // should be moved to the resource
-        this.path = "/lucene/";
+    public SearchResultView(String path, String query, List<Result> results, Categories categories) {
+        this(path, query, results, categories, null, null);
     }
 
-    public SearchResultView(String query, List<Result> results, Categories categories, Faceting faceting, String currentQuery) {
+    public SearchResultView(String path, String query, List<Result> results, Categories categories, Faceting faceting, String currentQuery) {
         super("result.fmt");
         this.query = query;
         this.results = results;
         this.categories = categories;
         this.faceting = faceting;
         this.currentQuery = currentQuery;
-        // should be moved to the resource
-        this.path = "/solr/";
+        this.path = path;
     }
 
     public Categories getCategories() {

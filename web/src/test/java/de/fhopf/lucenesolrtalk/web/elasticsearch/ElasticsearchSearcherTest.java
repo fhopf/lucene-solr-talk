@@ -4,9 +4,13 @@ import de.fhopf.elasticsearch.test.ElasticsearchTestNode;
 import de.fhopf.lucenesolrtalk.Result;
 import de.fhopf.lucenesolrtalk.Talk;
 import de.fhopf.lucenesolrtalk.elasticsearch.Indexer;
+import de.fhopf.lucenesolrtalk.web.Facet;
+import de.fhopf.lucenesolrtalk.web.Faceting;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import org.elasticsearch.action.search.SearchResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,32 +40,32 @@ public class ElasticsearchSearcherTest {
 
     @Test
     public void zeroResultsOnEmptyIndex() {
-        assertTrue(searcher.search("").isEmpty());
+        assertTrue(search("").isEmpty());
     }
 
     @Test
     public void matchInTitleIsFound() throws IOException {
         indexExampleTalk();
-        assertEquals(1, searcher.search("test").size());
+        assertEquals(1, search("test").size());
     }
 
     @Test
     public void phraseMatchInTitle() throws IOException {
         indexExampleTalk();
-        assertEquals(1, searcher.search("mit Elasticsearch").size());
+        assertEquals(1, search("mit Elasticsearch").size());
     }
 
     @Test
     public void titleIsStored() throws IOException {
         indexExampleTalk();
-        Result result = searcher.search("test").get(0);
+        Result result = search("test").get(0);
         assertEquals(talk.title, result.getTitle());
     }
 
     @Test
     public void emptyQueryReturnsDocuments() throws IOException {
         indexExampleTalk();
-        assertEquals(1, searcher.search("").size());
+        assertEquals(1, search("").size());
     }
     
     @Test
@@ -97,13 +101,54 @@ public class ElasticsearchSearcherTest {
         assertFalse(result.getExcerpt().contains("[content]"));
     }
     
+    @Test
+    public void speakerFacetsAreAvailable() throws IOException {
+        Faceting facets = facetsForSampleTalk();
+        assertEquals(talk.speakers.size(), facets.getSpeakerFacet().size());
+        for (Facet facet: facets.getSpeakerFacet()) {
+            assertTrue(facet.getTerm(), talk.speakers.contains(facet.getTerm()));
+            assertEquals(1, facet.getCount());
+        }
+    }
+    
+    @Test
+    public void categoryFacetsAreAvailable() throws IOException {
+        Faceting facets = facetsForSampleTalk();
+        assertEquals(talk.categories.size(), facets.getCategoryFacet().size());
+        for (Facet facet: facets.getCategoryFacet()) {
+            assertTrue(facet.getTerm(), talk.categories.contains(facet.getTerm()));
+            assertEquals(1, facet.getCount());
+        }
+    }
+
+    @Test
+    public void filtersAreApplied() throws IOException {
+        indexExampleTalk();
+        
+        SearchResponse response = searcher.search("", Arrays.asList("category:SomeCrazyStuff"));
+        assertEquals(0, response.hits().getTotalHits());
+        
+        response = searcher.search("", Arrays.asList("category:" + talk.categories.get(0)));
+        assertEquals(1, response.getHits().getTotalHits());
+    }
+    
     private Result indexAndSearchSingle(String term) throws IOException {
         indexExampleTalk();
-        return searcher.search(term).get(0);
+        return search(term).get(0);
+    }
+    
+    private Faceting facetsForSampleTalk() throws IOException {
+        indexExampleTalk();
+        SearchResponse response = searcher.search("*");
+        return searcher.getFacets(response);
     }
 
     private void indexExampleTalk() throws IOException {
         indexer.index(Arrays.asList(talk));
         testNode.getClient().admin().indices().prepareRefresh(ElasticsearchSearcher.INDEX).execute().actionGet();
+    }
+    
+    private List<Result> search(String term) {
+        return searcher.getResults(searcher.search(term));
     }
 }

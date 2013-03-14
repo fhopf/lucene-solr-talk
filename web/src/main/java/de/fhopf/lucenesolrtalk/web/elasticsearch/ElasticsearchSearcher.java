@@ -1,7 +1,10 @@
 package de.fhopf.lucenesolrtalk.web.elasticsearch;
 
 import de.fhopf.lucenesolrtalk.Result;
+import de.fhopf.lucenesolrtalk.web.Facet;
+import de.fhopf.lucenesolrtalk.web.Faceting;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -13,10 +16,14 @@ import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.joda.time.format.ISODateTimeFormat;
 import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.text.Text;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.highlight.HighlightField;
 
 /**
@@ -31,24 +38,32 @@ public class ElasticsearchSearcher {
         this.client = client;
     }
 
-    public List<Result> search(String token) {
-        List<Result> results = new ArrayList<Result>();
-        QueryBuilder queryBuilder = null;
-        if (token.isEmpty()) {
-            queryBuilder = QueryBuilders.matchAllQuery();
-        } else {
-            queryBuilder = QueryBuilders.queryString(token);
-        }
-        SearchResponse response = client.prepareSearch(INDEX).
-                addFields("title", "category", "speaker", "date").
-                setQuery(queryBuilder).
-                addHighlightedField("content").execute().actionGet();
+    public SearchResponse search(String token) {
+        return search(token, Collections.<String>emptyList());
+    }
+
+    public List<Result> getResults(SearchResponse response) {
+        List<Result> results = new ArrayList<>();
         for (SearchHit hit : response.getHits()) {
             Result res = new Result(getTitle(hit), getExcerpt(hit), getCategories(hit), getAuthors(hit), getDate(hit));
             results.add(res);
         }
 
         return results;
+    }
+
+    public Faceting getFacets(SearchResponse response) {
+
+        return new Faceting(buildFacets(response, "category"), buildFacets(response, "speaker"));
+    }
+
+    private List<Facet> buildFacets(SearchResponse response, String name) {
+        List<Facet> facets = new ArrayList<>();
+        TermsFacet termFacet = response.facets().facet(name);
+        for (TermsFacet.Entry entry : termFacet.entries()) {
+            facets.add(new Facet(entry.term(), entry.count(), name));
+        }
+        return facets;
     }
 
     private String getTitle(SearchHit hit) {
@@ -58,7 +73,7 @@ public class ElasticsearchSearcher {
     private String getExcerpt(SearchHit hit) {
         StringBuilder excerptBuilder = new StringBuilder();
         for (Map.Entry<String, HighlightField> highlight : hit.getHighlightFields().entrySet()) {
-            for (Text text: highlight.getValue().fragments()) {
+            for (Text text : highlight.getValue().fragments()) {
                 excerptBuilder.append(text.string());
                 excerptBuilder.append(" ... ");
             }
@@ -85,5 +100,32 @@ public class ElasticsearchSearcher {
     private Date getDate(SearchHit hit) {
         DateTime parseDateTime = ISODateTimeFormat.dateTimeParser().parseDateTime((String) hit.getFields().get("date").getValue());
         return parseDateTime.toDate();
+    }
+
+    public SearchResponse search(String token, Collection<String> filterQueries) {
+        QueryBuilder queryBuilder;
+        if (token.isEmpty()) {
+            queryBuilder = QueryBuilders.matchAllQuery();
+        } else {
+            queryBuilder = QueryBuilders.queryString(token);
+        }
+        if (!filterQueries.isEmpty()) {
+            FilterBuilder filter = null;
+            for (String fq : filterQueries) {
+                FilterBuilder currentFilter = FilterBuilders.queryFilter(QueryBuilders.queryString(fq));
+                if (filter == null) {
+                    filter = currentFilter;
+                } else {
+                    filter = FilterBuilders.andFilter(filter, currentFilter);
+                }
+            }
+            queryBuilder = QueryBuilders.filteredQuery(queryBuilder, filter);
+        }
+        return client.prepareSearch(INDEX).
+                addFacet(FacetBuilders.termsFacet("speaker").field("speaker")).
+                addFacet(FacetBuilders.termsFacet("category").field("category")).
+                addFields("title", "category", "speaker", "date").
+                setQuery(queryBuilder).
+                addHighlightedField("content").execute().actionGet();
     }
 }

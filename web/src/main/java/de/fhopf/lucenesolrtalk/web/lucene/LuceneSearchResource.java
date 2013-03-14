@@ -46,6 +46,6 @@ public class LuceneSearchResource {
             }
         }
 
-        return new SearchResultView(query.or("-"), results, new Categories(categories, category.or("")));
+        return new SearchResultView("/lucene/", query.or("-"), results, new Categories(categories, category.or("")));
     }
 }

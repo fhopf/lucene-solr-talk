@@ -6,7 +6,6 @@ import de.fhopf.lucenesolrtalk.TalkFromFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.*;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.index.IndexRequest;
@@ -14,7 +13,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
@@ -64,11 +62,11 @@ public class Indexer {
                 startObject().
                     startObject(TYPE).
                         startObject("properties").
-                            startObject("path").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
+                            startObject("path").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
                             startObject("title").field("type", "string").field("store", "yes").field("analyzer", "german").endObject().
-                            startObject("category").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
-                            startObject("speaker").field("type", "string").field("store", "yes").field("analyzed", "not_analyzed").endObject().
-                            startObject("date").field("type", "date").field("store", "yes").field("analyzed", "not_analyzed").endObject().
+                            startObject("category").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
+                            startObject("speaker").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
+                            startObject("date").field("type", "date").field("store", "yes").field("index", "not_analyzed").endObject().
                         endObject().
                     endObject().
                 endObject();

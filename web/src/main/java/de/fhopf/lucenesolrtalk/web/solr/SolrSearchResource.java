@@ -39,7 +39,7 @@ public class SolrSearchResource {
             currentQuery.append("&fq=");
             currentQuery.append(fq);
         }
-        return new SearchResultView(query.or(""), result.results, null, faceting, currentQuery.toString());
+        return new SearchResultView("/solr/", query.or(""), result.results, null, faceting, currentQuery.toString());
     }
 
     private List<Facet> transform(FacetField facetField) {
