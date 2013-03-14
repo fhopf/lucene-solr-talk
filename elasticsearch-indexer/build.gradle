@@ -30,6 +30,6 @@ jar {
 task index(type: JavaExec) {
     main = 'de.fhopf.lucenesolrtalk.elasticsearch.Indexer'
     classpath = sourceSets.main.runtimeClasspath
-    args = ['../../lucene/data/properties/']
+    args = ['../lucene/data/properties/']
     //debug = true
 }
