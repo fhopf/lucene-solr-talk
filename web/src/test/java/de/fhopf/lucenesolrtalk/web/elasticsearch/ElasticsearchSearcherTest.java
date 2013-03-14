@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import org.junit.Rule;
 
 /**
@@ -92,6 +93,8 @@ public class ElasticsearchSearcherTest {
     public void excerptIsAvailable() throws IOException {
         Result result = indexAndSearchSingle("content");
         assertTrue(result.getExcerpt().contains("Content"));
+        // no simple toString
+        assertFalse(result.getExcerpt().contains("[content]"));
     }
     
     private Result indexAndSearchSingle(String term) throws IOException {

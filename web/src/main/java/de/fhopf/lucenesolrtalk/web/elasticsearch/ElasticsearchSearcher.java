@@ -12,6 +12,7 @@ import org.elasticsearch.common.joda.time.DateTime;
 import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.joda.time.format.ISODateTimeFormat;
 import org.elasticsearch.common.lucene.search.Queries;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -57,7 +58,10 @@ public class ElasticsearchSearcher {
     private String getExcerpt(SearchHit hit) {
         StringBuilder excerptBuilder = new StringBuilder();
         for (Map.Entry<String, HighlightField> highlight : hit.getHighlightFields().entrySet()) {
-            excerptBuilder.append(highlight.getValue().toString());
+            for (Text text: highlight.getValue().fragments()) {
+                excerptBuilder.append(text.string());
+                excerptBuilder.append(" ... ");
+            }
         }
         return excerptBuilder.toString();
     }
