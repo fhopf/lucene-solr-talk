@@ -91,7 +91,7 @@ public class AnalyzerTest {
 
     @Test
     public void tokenizedAndLowercaseAndStemTalks() throws IOException {
-        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "von", "lucene", "zu", "solr", "und", "elasticsearch", "verteilt", "such", "mit");
+        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "von", "luc", "zu", "solr", "und", "elasticsearch", "verteilt", "such", "mit");
     }
     
     @Test
