@@ -91,8 +91,10 @@ public class ElasticsearchSearcher {
 
     private List<String> toStringList(SearchHitField field) {
         List<String> result = new ArrayList<>();
-        for (Object obj : field.values()) {
-            result.add(obj.toString());
+        if (field != null) {
+            for (Object obj : field.values()) {
+                result.add(obj.toString());
+            }
         }
         return result;
     }
@@ -107,7 +109,7 @@ public class ElasticsearchSearcher {
         if (token.isEmpty()) {
             queryBuilder = QueryBuilders.matchAllQuery();
         } else {
-            queryBuilder = QueryBuilders.queryString(token);
+            queryBuilder = QueryBuilders.queryString(token).useDisMax(true).field("title").field("content").field("speaker");
         }
         if (!filterQueries.isEmpty()) {
             FilterBuilder filter = null;
@@ -122,10 +124,11 @@ public class ElasticsearchSearcher {
             queryBuilder = QueryBuilders.filteredQuery(queryBuilder, filter);
         }
         return client.prepareSearch(INDEX).
-                addFacet(FacetBuilders.termsFacet("speaker").field("speaker")).
+                addFacet(FacetBuilders.termsFacet("speaker").field("speaker").size(40)).
                 addFacet(FacetBuilders.termsFacet("category").field("category")).
                 addFields("title", "category", "speaker", "date").
+                setSize(100).
                 setQuery(queryBuilder).
-                addHighlightedField("content").execute().actionGet();
+                addHighlightedField("content", 150, 5).execute().actionGet();
     }
 }
