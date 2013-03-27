@@ -36,7 +36,7 @@ public class AnalyzerTest {
 
     private String text = "Die Stadt liegt in den Bergen. Vom Berg kann man die Stadt sehen.";
     
-    private String talks = "Von Lucene zu Solr und ElasticSearch Verteiltes Suchen mit Elasticsearch";
+    private String talks = "Such Evolution - von Lucene zu Solr und ElasticSearch Verteiltes Suchen mit Elasticsearch";
 
     private static final Analyzer ONLY_TOKENIZED = new Analyzer() {
         @Override
@@ -81,17 +81,17 @@ public class AnalyzerTest {
     
     @Test
     public void tokenizeTalks() throws IOException {
-        assertAnalyzed(talks, ONLY_TOKENIZED, "Von", "Lucene", "zu", "Solr", "und", "ElasticSearch", "Verteiltes", "Suchen", "mit", "Elasticsearch");
+        assertAnalyzed(talks, ONLY_TOKENIZED, "Such", "Evolution", "von", "Lucene", "zu", "Solr", "und", "ElasticSearch", "Verteiltes", "Suchen", "mit", "Elasticsearch");
     }
 
     @Test
     public void tokenizeAndLowercaseTalks() throws IOException {
-        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED, "von", "lucene", "zu", "solr", "und", "elasticsearch", "verteiltes", "suchen", "mit");
+        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED, "such", "evolution", "von", "lucene", "zu", "solr", "und", "elasticsearch", "verteiltes", "suchen", "mit");
     }
 
     @Test
     public void tokenizedAndLowercaseAndStemTalks() throws IOException {
-        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "von", "luc", "zu", "solr", "und", "elasticsearch", "verteilt", "such", "mit");
+        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED_AND_STEMMED , "such", "evolution", "von", "luc", "zu", "solr", "und", "elasticsearch", "verteilt", "mit");
     }
     
     @Test
