@@ -67,6 +67,7 @@ public class Indexer {
                             startObject("category").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
                             startObject("speaker").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
                             startObject("date").field("type", "date").field("store", "yes").field("index", "not_analyzed").endObject().
+                            startObject("content").field("type", "string").field("store", "yes").field("analyzer", "german").field("term_vector", "with_positions_offsets").endObject().
                         endObject().
                     endObject().
                 endObject();
