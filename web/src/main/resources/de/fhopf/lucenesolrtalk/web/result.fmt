@@ -63,7 +63,7 @@
                 <div class="span9">
                     <form action="${path}" class="form-search">
                         <#if categories??>
-                        <select name="category">
+                        <!--<select name="category">
                             <option value="">---Kategorien---</option>
                             <#list categories.iterator() as category>
                                 <#if category == categories.current>
@@ -72,7 +72,7 @@
                                     <option value="${category}">${category?html}</option>
                                 </#if>
                             </#list>
-                        </select>
+                        </select>-->
                         </#if>
                         <input type="text" class="search-query span3" name="query" value="${query?html}"/>
                         <input type="submit" class="btn" value="Suchen"/>
@@ -107,11 +107,13 @@
                 <div class="row">
                     <h3>${result.title}</h3>
                     <p>${result.excerpt}</p>
+                    <#if result.categories?? && result.categories?has_content>
                     <p>Kategorien:
                     <#list result.categories as category>
                         ${category?html}&nbsp;
                     </#list>
                     </p>
+                    </#if>
                 </div>
             </#list>
             </div>

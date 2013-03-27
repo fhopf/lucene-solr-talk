@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -30,7 +31,10 @@ public class TalkFromFile implements Function<File, Talk> {
         String categoriesValue = props.getProperty("categories");
 
         List<String> speakers = Arrays.asList(speakerValue.split(","));
-        List<String> categories = Arrays.asList(categoriesValue.split(","));
+        List<String> categories = Collections.emptyList();
+        if (categoriesValue != null) {
+            categories = Arrays.asList(categoriesValue.split(","));    
+        }        
 
         return new Talk(input.getAbsolutePath(), title, speakers, parseDate(dateValue), contents, categories);
     }

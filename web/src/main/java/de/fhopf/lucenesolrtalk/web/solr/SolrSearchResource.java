@@ -44,7 +44,7 @@ public class SolrSearchResource {
 
     private List<Facet> transform(FacetField facetField) {
         List<Facet> facets = new ArrayList<>();
-        if (facetField != null) {
+        if (facetField != null && facetField.getValues() != null) {
             for (Count count : facetField.getValues()) {
                 facets.add(new Facet(count.getName(), count.getCount(), facetField.getName()));
             }

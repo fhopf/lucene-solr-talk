@@ -93,8 +93,10 @@ public class SolrSearcher {
     private List<String> toStrings(Collection<Object> values) {
         // TODO add a function
         List<String> result = new ArrayList<String>();
-        for (Object obj: values) {
-            result.add(obj.toString());
+        if (values != null) {
+            for (Object obj: values) {
+                result.add(obj.toString());
+            }
         }
         return result;
     }
