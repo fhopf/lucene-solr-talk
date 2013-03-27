@@ -723,6 +723,11 @@
             <str name="facet.field">category</str>
             <str name="facet.field">speaker</str>
             <str name="facet.mincount">1</str>
+            <!-- date range facets -->
+            <str name="facet.range">date</str>
+            <str name="f.date.facet.range.start">2011-01-01T00:00:00Z</str>
+            <str name="f.date.facet.range.end">2013-12-31T00:00:00Z</str>
+            <str name="f.date.facet.range.gap">+1YEAR</str>
             <!-- for long texts consider using Fast Vector Highlighter -->
             <str name="hl">on</str>
             <str name="hl.fl">title content</str>
