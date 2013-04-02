@@ -2,6 +2,12 @@ package de.fhopf.lucenesolrtalk.web.solr;
 
 import com.google.common.base.Optional;
 import de.fhopf.lucenesolrtalk.Result;
+import de.fhopf.lucenesolrtalk.web.Facet;
+import de.fhopf.lucenesolrtalk.web.Faceting;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -12,6 +18,8 @@ import org.apache.solr.common.SolrDocument;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
+import org.apache.solr.client.solrj.response.RangeFacet;
+import org.apache.solr.common.util.DateUtil;
 
 public class SolrSearcher {
 
@@ -30,14 +38,14 @@ public class SolrSearcher {
         if (query.isPresent()) {
             SolrQuery solrQuery = new SolrQuery(query.get());
             solrQuery.setQueryType("/jugka");
-            for(String filter: fq) {
+            for (String filter : fq) {
                 solrQuery.addFilterQuery(filter);
             }
             QueryResponse response = solrServer.query(solrQuery);
 
             // TODO move to a function?
             List<Result> results = new ArrayList<Result>();
-            for (SolrDocument doc: response.getResults()) {
+            for (SolrDocument doc : response.getResults()) {
                 // highlighting is a map from document id to Field<=>Fragment mapping
                 Map<String, List<String>> fragments = Collections.emptyMap();
                 if (response.getHighlighting() != null) {
@@ -50,11 +58,17 @@ public class SolrSearcher {
 
             FacetField categoryFacets = response.getFacetField("category");
             FacetField speakerFacets = response.getFacetField("speaker");
-            FacetField typeFacets = response.getFacetField("type");
+            RangeFacet.Date dateFacets = null;
+            if (!response.getFacetRanges().isEmpty()) {
+                // there is only one range facet
+                dateFacets = (RangeFacet.Date) response.getFacetRanges().get(0);
+            }
 
-            return new SolrSearchResult(results, categoryFacets, speakerFacets, typeFacets);
+            Faceting faceting = new Faceting(transform(categoryFacets), transform(speakerFacets), transform(dateFacets));
+            
+            return new SolrSearchResult(results, faceting);
         } else {
-            return new SolrSearchResult(Collections.<Result>emptyList(), null, null, null);
+            return new SolrSearchResult(Collections.<Result>emptyList(), null);
         }
 
     }
@@ -83,7 +97,7 @@ public class SolrSearcher {
     private String join(List<String> tokens) {
         // TODO use existing helper mehod
         StringBuilder builder = new StringBuilder();
-        for (String token: tokens) {
+        for (String token : tokens) {
             builder.append(token);
             builder.append(" ... ");
         }
@@ -94,11 +108,52 @@ public class SolrSearcher {
         // TODO add a function
         List<String> result = new ArrayList<String>();
         if (values != null) {
-            for (Object obj: values) {
+            for (Object obj : values) {
                 result.add(obj.toString());
             }
         }
         return result;
+    }
+
+    private List<Facet> transform(FacetField facetField) {
+        List<Facet> facets = new ArrayList<>();
+        if (facetField != null && facetField.getValues() != null) {
+            for (FacetField.Count count : facetField.getValues()) {
+                facets.add(Facet.withFilterQuery(count.getName(), count.getCount(), count.getAsFilterQuery()));
+            }
+        }
+        return facets;
+    }
+
+    private List<Facet> transform(RangeFacet.Date facetField) {
+        // this whole thing feels rather fragile and should be reworked
+        List<Facet> facets = new ArrayList<>();
+        if (facetField != null && facetField.getCounts() != null) {
+            for (RangeFacet.Count count : facetField.getCounts()) {
+                try {
+                    // for display we are just intersted in the year so take it from the start 
+                    Date startDate = DateUtil.parseDate(count.getValue());
+                    Calendar start = GregorianCalendar.getInstance();
+                    start.setTime(startDate);
+                    String label = String.valueOf(start.get(Calendar.YEAR));
+                    // create a filter query that spans from start to end
+                    // will result in something like this: [XXX TO XXX+1YEAR]
+                    StringBuilder fq = new StringBuilder(facetField.getName());
+                    fq.append(":[");
+                    fq.append(count.getValue());
+                    fq.append(" TO ");
+                    fq.append(count.getValue());
+                    fq.append(facetField.getGap());
+                    fq.append("]");
+                    facets.add(Facet.withFilterQuery(label, count.getCount(),  URLEncoder.encode(fq.toString(), "UTF-8")));
+                } catch (ParseException ex) {
+                    throw new IllegalStateException(ex);
+                } catch (UnsupportedEncodingException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+        return facets;
     }
 
 }

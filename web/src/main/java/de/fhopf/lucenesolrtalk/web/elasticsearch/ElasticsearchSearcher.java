@@ -12,9 +12,7 @@ import java.util.Map;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.joda.time.DateTime;
-import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.joda.time.format.ISODateTimeFormat;
-import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -23,6 +21,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.facet.datehistogram.DateHistogramFacet;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.highlight.HighlightField;
 
@@ -54,17 +53,36 @@ public class ElasticsearchSearcher {
 
     public Faceting getFacets(SearchResponse response) {
 
-        return new Faceting(buildFacets(response, "category"), buildFacets(response, "speaker"));
+        return new Faceting(buildFacets(response, "category"), buildFacets(response, "speaker"), buildYearFacets(response, "date"));
     }
 
     private List<Facet> buildFacets(SearchResponse response, String name) {
         List<Facet> facets = new ArrayList<>();
         TermsFacet termFacet = response.facets().facet(name);
         for (TermsFacet.Entry entry : termFacet.entries()) {
-            facets.add(new Facet(entry.term(), entry.count(), name));
+            facets.add(Facet.termFacet(entry.term(), entry.count(), name));
         }
         return facets;
     }
+    
+    private List<Facet> buildYearFacets(SearchResponse response, String name) {
+        List<Facet> facets = new ArrayList<>();
+        DateHistogramFacet dateFacet = response.facets().facet(name);
+        for (DateHistogramFacet.Entry entry : dateFacet.entries()) {
+            DateTime date = new DateTime(entry.getTime());
+            String formattedDate = ISODateTimeFormat.date().print(entry.getTime());
+            // building a range query should be seperated from the term filter queries
+//            StringBuilder fq = new StringBuilder(name);
+//            fq.append(":[");
+//            fq.append(formattedDate);
+//            fq.append(" TO ");
+//            fq.append(formattedDate);
+//            fq.append("||+12M/d]");
+            facets.add(Facet.withFilterQuery(String.valueOf(date.getYear()), entry.count(), ""));
+        }
+        return facets;
+    }
+    
 
     private String getTitle(SearchHit hit) {
         return hit.getFields().get("title").value().toString();
@@ -126,6 +144,7 @@ public class ElasticsearchSearcher {
         return client.prepareSearch(INDEX).
                 addFacet(FacetBuilders.termsFacet("speaker").field("speaker").size(40)).
                 addFacet(FacetBuilders.termsFacet("category").field("category")).
+                addFacet(FacetBuilders.dateHistogramFacet("date").field("date").interval("year")).
                 addFields("title", "category", "speaker", "date").
                 setSize(100).
                 setQuery(queryBuilder).

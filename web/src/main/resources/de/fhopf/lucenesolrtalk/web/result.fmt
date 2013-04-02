@@ -99,6 +99,14 @@
                     </#list>
                     </ul>
                 </#if>
+                <#if faceting?? && faceting.dateFacet?? && faceting.dateFacet?has_content>
+                    <h4>Datum:</h4>
+                    <ul>
+                    <#list faceting.dateFacet as count>
+                        <li><a href="${currentQuery}&fq=${count.fq}">${count.term} (${count.count})</a></li>
+                    </#list>
+                    </ul>
+                </#if>
 		&nbsp;
             </div>
 

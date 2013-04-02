@@ -12,12 +12,20 @@ public class Facet {
 
     private final String fq;
 
-    public Facet(String term, long count, String fieldname) {
-        this.term = term;
+    private Facet(String displayTerm, long count, String fq) {
+        this.term = displayTerm;
         this.count = count;
-        this.fq = fieldname.concat(":").concat(ClientUtils.escapeQueryChars(term));
+        this.fq = fq;
     }
 
+    public static Facet termFacet(String term, long count, String fieldname) {
+        return new Facet(term, count, fieldname.concat(":").concat(ClientUtils.escapeQueryChars(term)));
+    }
+    
+    public static Facet withFilterQuery(String term, long count, String fq) {
+        return new Facet(term, count, fq);
+    }
+    
     public String getTerm() {
         return term;
     }

@@ -1,22 +1,18 @@
 package de.fhopf.lucenesolrtalk.web.solr;
 
 import de.fhopf.lucenesolrtalk.Result;
-import org.apache.solr.client.solrj.response.FacetField;
+import de.fhopf.lucenesolrtalk.web.Faceting;
 
 import java.util.List;
 
 public class SolrSearchResult {
 
     public final List<Result> results;
-    public final FacetField categoryFacet;
-    public final FacetField speakerFacet;
-    public final FacetField typeFacet;
+    public final Faceting faceting;
 
-    public SolrSearchResult(List<Result> results, FacetField categoryFacet, FacetField speakerFacet, FacetField typeFacet) {
+    public SolrSearchResult(List<Result> results, Faceting faceting) {
         this.results = results;
-        this.categoryFacet = categoryFacet;
-        this.speakerFacet = speakerFacet;
-        this.typeFacet = typeFacet;
+        this.faceting = faceting;
     }
 
     @Override
