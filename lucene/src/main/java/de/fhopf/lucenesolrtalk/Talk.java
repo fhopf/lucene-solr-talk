@@ -14,13 +14,15 @@ public class Talk {
     public final Date date;
     public final String content;
     public final List<String> categories;
+    public final String organizer;
 
-    public Talk(String path, String title, List<String> speakers, Date date, String content, List<String> categories) {
+    public Talk(String path, String title, List<String> speakers, Date date, String content, List<String> categories, String organizer) {
         this.path = path;
         this.title = title;
         this.speakers = speakers;
         this.date = date;
         this.content = content;
         this.categories = categories;
+        this.organizer = organizer;
     }
 }

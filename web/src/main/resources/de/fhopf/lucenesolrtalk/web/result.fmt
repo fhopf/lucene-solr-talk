@@ -107,6 +107,14 @@
                     </#list>
                     </ul>
                 </#if>
+                <#if faceting?? && faceting.organizerFacet?? && faceting.organizerFacet?has_content>
+                    <h4>Organizer:</h4>
+                    <ul>
+                    <#list faceting.organizerFacet as count>
+                        <li><a href="${currentQuery}&fq=${count.fq}">${count.term} (${count.count})</a></li>
+                    </#list>
+                    </ul>
+                </#if>
 		&nbsp;
             </div>
 

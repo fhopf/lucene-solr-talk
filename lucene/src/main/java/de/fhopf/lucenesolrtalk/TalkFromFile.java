@@ -29,14 +29,16 @@ public class TalkFromFile implements Function<File, Talk> {
         String dateValue = props.getProperty("date");
         String contents = props.getProperty("content");
         String categoriesValue = props.getProperty("categories");
+        String organizer = props.getProperty("organizer", "");
 
         List<String> speakers = Arrays.asList(speakerValue.split(","));
         List<String> categories = Collections.emptyList();
         if (categoriesValue != null) {
             categories = Arrays.asList(categoriesValue.split(","));    
         }        
+        
 
-        return new Talk(input.getAbsolutePath(), title, speakers, parseDate(dateValue), contents, categories);
+        return new Talk(input.getAbsolutePath(), title, speakers, parseDate(dateValue), contents, categories, organizer);
     }
 
     private Date parseDate(String dateValue) {

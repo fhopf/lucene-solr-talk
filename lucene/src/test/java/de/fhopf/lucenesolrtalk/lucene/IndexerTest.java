@@ -43,8 +43,8 @@ public class IndexerTest {
 
     @Test
     public void twoTalksAreIndexed() throws IOException {
-        Talk talk1 = new Talk("/path/to/talk1", "Title 1", Arrays.asList("Author 1"), new Date(), "Contents", new ArrayList<String>());
-        Talk talk2 = new Talk("/path/to/talk2", "Title 2", Arrays.asList("Author 2"), new Date(), "More Contents", new ArrayList<String>());
+        Talk talk1 = new Talk("/path/to/talk1", "Title 1", Arrays.asList("Author 1"), new Date(), "Contents", new ArrayList<String>(), "");
+        Talk talk2 = new Talk("/path/to/talk2", "Title 2", Arrays.asList("Author 2"), new Date(), "More Contents", new ArrayList<String>(), "");
 
         indexer.index(talk1, talk2);
         assertDocumentCount(2);

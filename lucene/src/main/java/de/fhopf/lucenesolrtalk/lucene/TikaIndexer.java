@@ -54,7 +54,7 @@ public class TikaIndexer {
                 // TODO date
                 Date date = new Date();
                 Talk talk = new Talk(file.getAbsolutePath(), title.or(file.getName()), Arrays.asList(speaker.or("")), date, contentHandler.toString(),
-                        Collections.<String>emptyList());
+                        Collections.<String>emptyList(), "");
                 talks.add(talk);
             } catch (FileNotFoundException e) {
                 logger.warn(e.getMessage(), e);

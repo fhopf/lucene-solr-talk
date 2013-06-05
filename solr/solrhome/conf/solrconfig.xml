@@ -722,6 +722,7 @@
             <str name="facet">on</str>
             <str name="facet.field">category</str>
             <str name="facet.field">speaker</str>
+            <str name="facet.field">organizer</str>
             <str name="facet.mincount">1</str>
             <!-- date range facets -->
             <str name="facet.range">date</str>

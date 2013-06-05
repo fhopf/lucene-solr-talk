@@ -40,6 +40,7 @@ public class Indexer {
                     .field("title", talk.title)
                     .field("date", talk.date)
                     .field("content", talk.content)
+                    .field("organizer", talk.organizer)
                     .array("category", talk.categories.toArray(new String[0]))
                     .array("speaker", talk.speakers.toArray(new String[0]));
             IndexRequest request = new IndexRequest(INDEX, TYPE).id(talk.path).source(sourceBuilder);
@@ -68,6 +69,7 @@ public class Indexer {
                             startObject("speaker").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
                             startObject("date").field("type", "date").field("store", "yes").field("index", "not_analyzed").endObject().
                             startObject("content").field("type", "string").field("store", "yes").field("analyzer", "german").field("term_vector", "with_positions_offsets").endObject().
+                            startObject("organizer").field("type", "string").field("store", "yes").field("index", "not_analyzed").endObject().
                         endObject().
                     endObject().
                 endObject();

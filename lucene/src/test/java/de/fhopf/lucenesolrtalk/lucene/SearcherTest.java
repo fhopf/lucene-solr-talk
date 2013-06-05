@@ -65,9 +65,9 @@ public class SearcherTest {
 
     @Test
     public void searchByQueryAndCategory() throws ParseException {
-        Talk inCategory = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"));
-        Talk inCategoryNoMatch = new Talk("", "kein Treffer", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"));
-        Talk notInCategoryWouldMatch = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat2"));
+        Talk inCategory = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"), "");
+        Talk inCategoryNoMatch = new Talk("", "kein Treffer", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"), "");
+        Talk notInCategoryWouldMatch = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat2"), "");
         indexer.index(inCategory, inCategoryNoMatch, notInCategoryWouldMatch);
 
         List<Result> result = searcher.search("Titel", Optional.<String>of("cat1"));
@@ -81,8 +81,8 @@ public class SearcherTest {
         Calendar cal = GregorianCalendar.getInstance();
         cal.roll(Calendar.DAY_OF_MONTH, -1);
         Date yesterday = cal.getTime();
-        Talk yesterdayMoreRelevant = new Talk("", "Titel Treffer", new ArrayList<String>(), yesterday, "", new ArrayList<String>());
-        Talk today = new Talk("", "Titel", new ArrayList<String>(), now, "", new ArrayList<String>());
+        Talk yesterdayMoreRelevant = new Talk("", "Titel Treffer", new ArrayList<String>(), yesterday, "", new ArrayList<String>(), "");
+        Talk today = new Talk("", "Titel", new ArrayList<String>(), now, "", new ArrayList<String>(), "");
         indexer.index(yesterdayMoreRelevant, today);
 
         // sanity check
@@ -105,7 +105,7 @@ public class SearcherTest {
         }
         content.append("aber jetzt kommt das Wort nochmal.");
 
-        Talk talk = new Talk("", "", Collections.<String>emptyList(), new Date(), content.toString(), Collections.<String>emptyList());
+        Talk talk = new Talk("", "", Collections.<String>emptyList(), new Date(), content.toString(), Collections.<String>emptyList(), "");
         indexer.index(talk);
 
         List<Result> result = searcher.search("Wort");
@@ -115,11 +115,11 @@ public class SearcherTest {
     }
 
     private Talk newAuthorTalk(String author) {
-        return new Talk("", "", Arrays.asList(author), new Date(), "", new ArrayList<String>());
+        return new Talk("", "", Arrays.asList(author), new Date(), "", new ArrayList<String>(), "");
     }
 
     private Talk newCategoryTalk(String... category) {
-        return new Talk("", "", new ArrayList<String>(), new Date(), "", Arrays.asList(category));
+        return new Talk("", "", new ArrayList<String>(), new Date(), "", Arrays.asList(category), "");
     }
 
 }

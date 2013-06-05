@@ -329,6 +329,7 @@
    <field name="speaker_search" type="text_ws" indexed="true" stored="false" 
 	multiValued="true"/>
    <field name="content" type="text_de" indexed="true" stored="true"/>
+   <field name="organizer" type="string" indexed="true" stored="true"/>
  </fields>
 
  <uniqueKey>path</uniqueKey>

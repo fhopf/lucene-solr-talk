@@ -58,13 +58,14 @@ public class SolrSearcher {
 
             FacetField categoryFacets = response.getFacetField("category");
             FacetField speakerFacets = response.getFacetField("speaker");
+            FacetField organizerFacets = response.getFacetField("organizer");
             RangeFacet.Date dateFacets = null;
             if (!response.getFacetRanges().isEmpty()) {
                 // there is only one range facet
                 dateFacets = (RangeFacet.Date) response.getFacetRanges().get(0);
             }
 
-            Faceting faceting = new Faceting(transform(categoryFacets), transform(speakerFacets), transform(dateFacets));
+            Faceting faceting = new Faceting(transform(categoryFacets), transform(speakerFacets), transform(dateFacets), transform(organizerFacets));
             
             return new SolrSearchResult(results, faceting);
         } else {

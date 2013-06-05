@@ -53,7 +53,7 @@ public class ElasticsearchSearcher {
 
     public Faceting getFacets(SearchResponse response) {
 
-        return new Faceting(buildFacets(response, "category"), buildFacets(response, "speaker"), buildYearFacets(response, "date"));
+        return new Faceting(buildFacets(response, "category"), buildFacets(response, "speaker"), buildYearFacets(response, "date"), buildFacets(response, "organizer"));
     }
 
     private List<Facet> buildFacets(SearchResponse response, String name) {
@@ -145,6 +145,7 @@ public class ElasticsearchSearcher {
                 addFacet(FacetBuilders.termsFacet("speaker").field("speaker").size(40)).
                 addFacet(FacetBuilders.termsFacet("category").field("category")).
                 addFacet(FacetBuilders.dateHistogramFacet("date").field("date").interval("year")).
+                addFacet(FacetBuilders.termsFacet("organizer").field("organizer")).
                 addFields("title", "category", "speaker", "date").
                 setSize(100).
                 setQuery(queryBuilder).

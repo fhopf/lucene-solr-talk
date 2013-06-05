@@ -5,12 +5,14 @@ import de.fhopf.lucenesolrtalk.Talk;
 import de.fhopf.lucenesolrtalk.TalkFromFile;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
 /**
  * Indexes files in Solr.
@@ -19,6 +21,8 @@ public class Indexer {
 
     private final SolrServer server;
 
+    private final Log log = LogFactory.getLog(Indexer.class);
+    
     public Indexer(SolrServer server) {
         this.server = server;
     }
@@ -32,6 +36,7 @@ public class Indexer {
             doc.addField("title", talk.title);
             doc.addField("date", talk.date);
             doc.addField("content", talk.content);
+            doc.addField("organizer", talk.organizer);
             for (String category: talk.categories) {
                 doc.addField("category", category);
             }
@@ -56,9 +61,7 @@ public class Indexer {
             System.exit(-1);
         }
 
-        // could also be passed in
-        // TODO use HttpSolrServer
-        SolrServer server = new CommonsHttpSolrServer(args[0]);
+        SolrServer server = new HttpSolrServer(args[0]);
 
         List<File> files = Arrays.asList(new File(args[1]).listFiles());
 
