@@ -746,8 +746,8 @@
             <!--<str name="hl.content.alternateField">content</str>
             <str name="hl.content.maxAlternateFieldLength">200</str>-->
             <str name="hl.formatter">html</str>
-            <str name="hl.simple.pre"><![CDATA[<b style="background: yellow">]]></str>
-            <str name="hl.simple.post"><![CDATA[</b>]]></str>
+            <str name="hl.simple.pre"><![CDATA[<em>]]></str>
+            <str name="hl.simple.post"><![CDATA[</em>]]></str>
 
         </lst>
 
