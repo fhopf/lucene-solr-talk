@@ -27,7 +27,7 @@ dependencies {
     compile group: 'com.yammer.dropwizard', name: 'dropwizard-core', version: dropwizardVersion
     compile group: 'com.yammer.dropwizard', name: 'dropwizard-views', version: dropwizardVersion
     compile group: 'de.fhopf.lucenesolrtalk', name: 'lucene', version: '1.0-SNAPSHOT'
-    compile group: 'org.apache.solr', name: 'solr-solrj', version: '3.6.0'
+    compile group: 'org.apache.solr', name: 'solr-solrj', version: '4.2.0'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2'
     compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.2'
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: '0.20.5'
@@ -45,7 +45,7 @@ task oneJar(type: OneJar) {
 // Configure the run task to start the Dropwizard service
 run {
     args 'server','search.yml'
-
+    debug Boolean.valueOf(System.getProperty("debug", "false"))
 }
 
 artifacts {

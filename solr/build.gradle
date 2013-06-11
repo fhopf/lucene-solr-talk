@@ -13,9 +13,9 @@ configurations {
 }
 
 dependencies {
-    solrWebApp "org.apache.solr:solr:3.6.0@war"
+    solrWebApp "org.apache.solr:solr:4.2.0@war"
     testCompile "junit:junit:4.10"
-    testCompile "org.apache.solr:solr-test-framework:3.6.0"
+    testCompile "org.apache.solr:solr-test-framework:4.2.0"
 }
 
 // custom task that configures the jetty plugin
@@ -25,7 +25,6 @@ task runSolr(type: JettyRunWar) {
     // jetty configuration
     httpPort = 8082
     contextPath = 'solr'
-
 }
 
 // executed before jetty plugin
