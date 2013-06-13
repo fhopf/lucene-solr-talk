@@ -1,8 +1,6 @@
 package de.fhopf.lucenesolrtalk.lucene;
 
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.search.IndexSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,19 +22,10 @@ public class Utils {
         }
     }
 
-    public static final void logTermDictionary(IndexReader reader) throws IOException {
-        TermEnum terms = reader.terms();
-        while(terms.next()) {
-            Term term = terms.term();
-            logger.info(String.format("%s: %s", term.field(), term.text()));
-        }
-    }
-
-
     public static void close(IndexSearcher searcher) {
         if (searcher != null) {
             try {
-                searcher.close();
+                searcher.getIndexReader().close();
             } catch (IOException e) {
                 logger.warn(e.getMessage(), e);
             }

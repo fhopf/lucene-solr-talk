@@ -3,8 +3,6 @@ package de.fhopf.lucenesolrtalk.lucene;
 import com.google.common.collect.Collections2;
 import de.fhopf.lucenesolrtalk.Talk;
 import de.fhopf.lucenesolrtalk.TalkFromFile;
-import org.apache.lucene.analysis.de.GermanAnalyzer;
-import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
@@ -19,6 +17,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import org.apache.lucene.analysis.de.GermanAnalyzer;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 
 /**
  * Indexes talks in Lucene.
@@ -34,7 +38,7 @@ public class Indexer {
     }
 
     public void index(Talk...talks) {
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new GermanAnalyzer(Version.LUCENE_36));
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, new GermanAnalyzer(Version.LUCENE_43));
         IndexWriter writer = null;
         try {
             writer = new IndexWriter(directory, config);
@@ -73,15 +77,15 @@ public class Indexer {
     private Document asDocument(Talk talk) {
         Document doc = new Document();
         for (String speaker: talk.speakers) {
-            doc.add(new Field("speaker", speaker, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS));
+            doc.add(new TextField("speaker", speaker, Field.Store.YES));
         }
-        doc.add(new Field("title", talk.title, Field.Store.YES, Field.Index.ANALYZED));
-        doc.add(new Field("path", talk.path, Field.Store.YES, Field.Index.NO));
-        doc.add(new Field("content", talk.content, Field.Store.YES, Field.Index.ANALYZED));
+        doc.add(new TextField("title", talk.title, Field.Store.YES));
+        doc.add(new StoredField("path", talk.path));
+        doc.add(new TextField("content", talk.content, Field.Store.YES));
         for (String category: talk.categories) {
-            doc.add(new Field("category", category, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            doc.add(new StringField("category", category, Field.Store.YES));
         }
-        doc.add(new Field("date", DateTools.timeToString(talk.date.getTime(), DateTools.Resolution.DAY), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        doc.add(new StringField("date", DateTools.timeToString(talk.date.getTime(), DateTools.Resolution.DAY), Field.Store.YES));
 
         return doc;
     }

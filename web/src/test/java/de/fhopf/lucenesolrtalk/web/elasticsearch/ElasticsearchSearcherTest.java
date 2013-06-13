@@ -126,7 +126,7 @@ public class ElasticsearchSearcherTest {
         indexExampleTalk();
         
         SearchResponse response = searcher.search("", Arrays.asList("category:SomeCrazyStuff"));
-        assertEquals(0, response.hits().getTotalHits());
+        assertEquals(0, response.getHits().getTotalHits());
         
         response = searcher.search("", Arrays.asList("category:" + talk.categories.get(0)));
         assertEquals(1, response.getHits().getTotalHits());

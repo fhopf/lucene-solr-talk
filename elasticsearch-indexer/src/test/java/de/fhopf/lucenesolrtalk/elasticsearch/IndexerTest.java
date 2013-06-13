@@ -29,7 +29,7 @@ public class IndexerTest {
     public ElasticsearchTestNode testNode = new ElasticsearchTestNode();
     private Indexer indexer;
     private Talk talk = new Talk("/foo/bar", "Testen mit Elasticsearch", Arrays.asList("Florian Hopf"),
-            new Date(), "Foo Bar Content", Arrays.asList("Test", "Elasticsearch"));
+            new Date(), "Foo Bar Content", Arrays.asList("Test", "Elasticsearch"), "");
 
     @Before
     public void initIndexer() {

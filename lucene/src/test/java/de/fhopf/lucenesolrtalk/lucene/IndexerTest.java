@@ -1,7 +1,6 @@
 package de.fhopf.lucenesolrtalk.lucene;
 
 import de.fhopf.lucenesolrtalk.Talk;
-import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
@@ -27,6 +26,9 @@ import java.util.Date;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 
 /**
  */
@@ -60,7 +62,7 @@ public class IndexerTest {
     public void indexOneTalkFromDirectory() throws IOException {
         Path dir = Files.createTempDirectory("indexertest");
         Path file = Files.createTempFile(dir, "post", ".properties");
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         lines.add("speaker=Tester");
         lines.add("title=Test");
         lines.add("content=Content");
@@ -75,11 +77,11 @@ public class IndexerTest {
 
     @Test
     public void transactionsAreNotIsolated() throws IOException, InterruptedException {
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, new KeywordAnalyzer());
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, new KeywordAnalyzer());
         final IndexWriter writer = new IndexWriter(directory, config);
         // add a dummy document so the index is created
         Document dummy = new Document();
-        dummy.add(new Field("name", "value", Field.Store.NO, Field.Index.ANALYZED));
+        dummy.add(new TextField("name", "value", Field.Store.NO));
         writer.addDocument(dummy);
         writer.commit();
 
@@ -87,7 +89,7 @@ public class IndexerTest {
             @Override
             public void run() {
                 Document doc1 = new Document();
-                doc1.add(new Field("key", "doc1", Field.Store.NO, Field.Index.ANALYZED));
+                doc1.add(new TextField("key", "doc1", Field.Store.NO));
                 try {
                     writer.addDocument(doc1);
                     // no commit
@@ -100,7 +102,7 @@ public class IndexerTest {
         t1.join();
 
         // no result as there was no commit
-        IndexSearcher searcher = new IndexSearcher(IndexReader.open(directory));
+        IndexSearcher searcher = new IndexSearcher(DirectoryReader.open(directory));
         TopDocs docs = searcher.search(new TermQuery(new Term("key", "doc1")), 10);
         assertEquals(0, docs.totalHits);
 
@@ -108,7 +110,7 @@ public class IndexerTest {
             @Override
             public void run() {
                 Document doc2 = new Document();
-                doc2.add(new Field("key", "doc2", Field.Store.NO, Field.Index.ANALYZED));
+                doc2.add(new TextField("key", "doc2", Field.Store.NO));
                 try {
                     writer.addDocument(doc2);
                     writer.commit();
@@ -121,7 +123,7 @@ public class IndexerTest {
         t2.join();
 
         // both documents are committed
-        searcher = new IndexSearcher(IndexReader.open(directory));
+        searcher = new IndexSearcher(DirectoryReader.open(directory));
         docs = searcher.search(new TermQuery(new Term("key", "doc1")), 10);
         assertEquals(1, docs.totalHits);
         docs = searcher.search(new TermQuery(new Term("key", "doc2")), 10);

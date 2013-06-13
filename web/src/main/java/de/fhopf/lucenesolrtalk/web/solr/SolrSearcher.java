@@ -37,7 +37,7 @@ public class SolrSearcher {
 
         if (query.isPresent()) {
             SolrQuery solrQuery = new SolrQuery(query.get());
-            solrQuery.setQueryType("/jugka");
+            solrQuery.setRequestHandler("/jugka");
             for (String filter : fq) {
                 solrQuery.addFilterQuery(filter);
             }

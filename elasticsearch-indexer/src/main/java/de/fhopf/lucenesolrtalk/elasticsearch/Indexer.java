@@ -51,7 +51,7 @@ public class Indexer {
     }
 
     public void prepareIndex() throws IOException {
-        boolean indexExists = client.admin().indices().prepareExists(INDEX).execute().actionGet().exists();
+        boolean indexExists = client.admin().indices().prepareExists(INDEX).execute().actionGet().isExists();
         if (indexExists) {
             // delete the whole index as during development it is likely that the types will change
             //node.client().prepareDeleteByQuery(INDEX).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();

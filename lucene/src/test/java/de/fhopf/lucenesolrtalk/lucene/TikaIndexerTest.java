@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import de.fhopf.lucenesolrtalk.Result;
 import de.fhopf.lucenesolrtalk.Talk;
-import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.tika.exception.TikaException;
@@ -23,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static junit.framework.Assert.*;
+import org.apache.lucene.queryparser.classic.ParseException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 

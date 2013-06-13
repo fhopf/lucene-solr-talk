@@ -7,9 +7,11 @@ repositories {
 
 
 dependencies {
-    compile group: 'org.apache.lucene', name: 'lucene-core', version: '3.6.0'
-    compile group: 'org.apache.lucene', name: 'lucene-analyzers', version: '3.6.0'
-    compile group: 'org.apache.lucene', name: 'lucene-highlighter', version: '3.6.0'
+    compile group: 'org.apache.lucene', name: 'lucene-core', version: '4.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: '4.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-highlighter', version: '4.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-queries', version: '4.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-queryparser', version: '4.3.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.6.4'
     compile group: 'com.google.guava', name: 'guava', version: '10.0.1'
     compile group: 'org.apache.tika', name: 'tika-core', version: '1.1'

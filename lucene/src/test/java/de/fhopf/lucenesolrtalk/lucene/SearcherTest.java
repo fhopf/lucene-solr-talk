@@ -3,7 +3,6 @@ package de.fhopf.lucenesolrtalk.lucene;
 import com.google.common.base.Optional;
 import de.fhopf.lucenesolrtalk.Result;
 import de.fhopf.lucenesolrtalk.Talk;
-import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.junit.Before;
@@ -13,6 +12,7 @@ import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import org.apache.lucene.queryparser.classic.ParseException;
 
 public class SearcherTest {
 
@@ -27,16 +27,6 @@ public class SearcherTest {
     }
 
     @Test
-    public void searchForSingleExactCategory() throws ParseException {
-        Talk talk1 = newCategoryTalk("Architektur", "Integration");
-        Talk talk2 = newCategoryTalk("Architektur");
-        Talk talk3 = newCategoryTalk("Integration", "OSGi");
-        indexer.index(talk1, talk2, talk3);
-        List<Result> documents = searcher.search("*:*", Optional.<String>of("Architektur"));
-        assertEquals(2, documents.size());
-    }
-
-    @Test
     public void searchAuthor() throws ParseException {
         Talk talk1 = newAuthorTalk("Florian Hopf");
         Talk talk2 = newAuthorTalk("Florian");
@@ -45,34 +35,6 @@ public class SearcherTest {
         assertEquals(2, documents.size());
         documents = searcher.search("speaker:\"Florian Hopf\"");
         assertEquals(1, documents.size());
-    }
-
-    @Test
-    public void allCategories() {
-        Talk talk1 = newCategoryTalk("category1", "category3", "category2");
-        Talk talk2 = newCategoryTalk("category1", "category4");
-        indexer.index(talk1, talk2);
-
-        List<String> categories = searcher.getAllCategories();
-        assertEquals(4, categories.size());
-        // categories are sorted
-        assertEquals("category1", categories.get(0));
-        assertEquals("category2", categories.get(1));
-        assertEquals("category3", categories.get(2));
-        assertEquals("category4", categories.get(3));
-
-    }
-
-    @Test
-    public void searchByQueryAndCategory() throws ParseException {
-        Talk inCategory = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"), "");
-        Talk inCategoryNoMatch = new Talk("", "kein Treffer", new ArrayList<String>(), new Date(), "", Arrays.asList("cat1", "cat2"), "");
-        Talk notInCategoryWouldMatch = new Talk("", "Titel der trifft", new ArrayList<String>(), new Date(), "", Arrays.asList("cat2"), "");
-        indexer.index(inCategory, inCategoryNoMatch, notInCategoryWouldMatch);
-
-        List<Result> result = searcher.search("Titel", Optional.<String>of("cat1"));
-        assertEquals(1, result.size());
-        assertEquals("Titel der trifft", result.get(0).getTitle());
     }
 
     @Test
@@ -91,7 +53,7 @@ public class SearcherTest {
         assertEquals("Titel Treffer", result.get(0).getTitle());
 
         // sort
-        result = searcher.searchSortedByDate("Titel", Optional.<String>absent());
+        result = searcher.searchSortedByDate("Titel");
         assertEquals(2, result.size());
         assertEquals("Titel", result.get(0).getTitle());
 

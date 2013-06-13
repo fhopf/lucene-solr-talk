@@ -30,7 +30,7 @@ dependencies {
     compile group: 'org.apache.solr', name: 'solr-solrj', version: '4.2.0'
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2'
     compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.2'
-    compile group: 'org.elasticsearch', name: 'elasticsearch', version: '0.20.5'
+    compile group: 'org.elasticsearch', name: 'elasticsearch', version: '0.90.1'
     testCompile project(':elasticsearch-junit-rule')
     testCompile project(':elasticsearch-indexer')
 }

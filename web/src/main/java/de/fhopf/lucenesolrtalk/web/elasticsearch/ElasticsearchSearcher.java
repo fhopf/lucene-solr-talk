@@ -58,17 +58,17 @@ public class ElasticsearchSearcher {
 
     private List<Facet> buildFacets(SearchResponse response, String name) {
         List<Facet> facets = new ArrayList<>();
-        TermsFacet termFacet = response.facets().facet(name);
-        for (TermsFacet.Entry entry : termFacet.entries()) {
-            facets.add(Facet.termFacet(entry.term(), entry.count(), name));
+        TermsFacet termFacet = response.getFacets().facet(name);
+        for (TermsFacet.Entry entry : termFacet.getEntries()) {
+            facets.add(Facet.termFacet(entry.getTerm().string(), entry.getCount(), name));
         }
         return facets;
     }
     
     private List<Facet> buildYearFacets(SearchResponse response, String name) {
         List<Facet> facets = new ArrayList<>();
-        DateHistogramFacet dateFacet = response.facets().facet(name);
-        for (DateHistogramFacet.Entry entry : dateFacet.entries()) {
+        DateHistogramFacet dateFacet = response.getFacets().facet(name);
+        for (DateHistogramFacet.Entry entry : dateFacet.getEntries()) {
             DateTime date = new DateTime(entry.getTime());
             String formattedDate = ISODateTimeFormat.date().print(entry.getTime());
             // building a range query should be seperated from the term filter queries
@@ -78,7 +78,7 @@ public class ElasticsearchSearcher {
 //            fq.append(" TO ");
 //            fq.append(formattedDate);
 //            fq.append("||+12M/d]");
-            facets.add(Facet.withFilterQuery(String.valueOf(date.getYear()), entry.count(), ""));
+            facets.add(Facet.withFilterQuery(String.valueOf(date.getYear()), entry.getCount(), ""));
         }
         return facets;
     }

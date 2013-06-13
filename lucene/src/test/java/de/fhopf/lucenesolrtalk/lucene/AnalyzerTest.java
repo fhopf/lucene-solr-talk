@@ -9,8 +9,6 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.*;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -31,29 +29,31 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.util.BytesRef;
 
 public class AnalyzerTest {
 
     private String text = "Die Stadt liegt in den Bergen. Vom Berg kann man die Stadt sehen.";
-    
     private String talks = "Such Evolution - von Lucene zu Solr und ElasticSearch Verteiltes Suchen mit Elasticsearch";
-
     private static final Analyzer ONLY_TOKENIZED = new Analyzer() {
         @Override
-        public TokenStream tokenStream(String fieldName, Reader reader) {
-            return new StandardTokenizer(Version.LUCENE_36, reader);
+        protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+            return new TokenStreamComponents(new StandardTokenizer(Version.LUCENE_43, reader));
         }
     };
-
-    private static final Analyzer TOKENIZED_AND_LOWERCASED = new ReusableAnalyzerBase() {
+    private static final Analyzer TOKENIZED_AND_LOWERCASED = new Analyzer() {
         @Override
         protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-            Tokenizer source = new StandardTokenizer(Version.LUCENE_36, reader);
-            return new TokenStreamComponents(source, new LowerCaseFilter(Version.LUCENE_36, source));
+            Tokenizer source = new StandardTokenizer(Version.LUCENE_43, reader);
+            return new TokenStreamComponents(source, new LowerCaseFilter(Version.LUCENE_43, source));
         }
     };
-
-    private static final Analyzer TOKENIZED_AND_LOWERCASED_AND_STEMMED = new ReusableAnalyzerBase() {
+    private static final Analyzer TOKENIZED_AND_LOWERCASED_AND_STEMMED = new Analyzer() {
         @Override
         protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
             Tokenizer source = new StandardTokenizer(Version.LUCENE_36, reader);
@@ -78,7 +78,7 @@ public class AnalyzerTest {
     public void tokenizedAndLowercasedAndStemmed() throws IOException {
         assertAnalyzed(text, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "die", "stadt", "liegt", "in", "den", "berg", "vom", "kann", "man", "seh");
     }
-    
+
     @Test
     public void tokenizeTalks() throws IOException {
         assertAnalyzed(talks, ONLY_TOKENIZED, "Such", "Evolution", "von", "Lucene", "zu", "Solr", "und", "ElasticSearch", "Verteiltes", "Suchen", "mit", "Elasticsearch");
@@ -91,39 +91,33 @@ public class AnalyzerTest {
 
     @Test
     public void tokenizedAndLowercaseAndStemTalks() throws IOException {
-        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED_AND_STEMMED , "such", "evolution", "von", "luc", "zu", "solr", "und", "elasticsearch", "verteilt", "mit");
+        assertAnalyzed(talks, TOKENIZED_AND_LOWERCASED_AND_STEMMED, "such", "evolution", "von", "luc", "zu", "solr", "und", "elasticsearch", "verteilt", "mit");
     }
-    
+
     @Test
     public void analyzeQueries() throws IOException {
         assertAnalyzed("Verteiltes", TOKENIZED_AND_LOWERCASED_AND_STEMMED, "verteilt");
         assertAnalyzed("Suchen", TOKENIZED_AND_LOWERCASED_AND_STEMMED, "such");
     }
-    
+
     @Test
     public void indexExampleTalks() throws IOException, ParseException {
-        
-	Document camel = new Document();
-        camel.add(new Field("title", "Integration ganz einfach mit Apache Camel", 
-				Field.Store.YES, Field.Index.ANALYZED));
-        camel.add(new Field("date", "20120404", Field.Store.NO, 
-				Field.Index.ANALYZED));
-        camel.add(new Field("speaker", "Christian Schneider", Field.Store.YES, 
-				Field.Index.ANALYZED));
+
+        Document camel = new Document();
+        camel.add(new TextField("title", "Integration ganz einfach mit Apache Camel",
+                Field.Store.YES));
+        camel.add(new TextField("date", "20120404", Field.Store.NO));
+        camel.add(new TextField("speaker", "Christian Schneider", Field.Store.YES));
 
         Document karaf = new Document();
-        karaf.add(new Field("title", "Apache Karaf", Field.Store.YES, 
-				Field.Index.ANALYZED));
-        karaf.add(new Field("date", "20120424", Field.Store.NO, 
-				Field.Index.ANALYZED));
-        karaf.add(new Field("speaker", "Christian Schneider", Field.Store.YES, 
-				Field.Index.ANALYZED));
-        karaf.add(new Field("speaker", "Achim Nierbeck", Field.Store.YES, 
-				Field.Index.ANALYZED));
+        karaf.add(new TextField("title", "Apache Karaf", Field.Store.YES));
+        karaf.add(new TextField("date", "20120424", Field.Store.NO));
+        karaf.add(new TextField("speaker", "Christian Schneider", Field.Store.YES));
+        karaf.add(new TextField("speaker", "Achim Nierbeck", Field.Store.YES));
 
         Directory dir = FSDirectory.open(new File("/tmp/testindex"));
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, 
-					new GermanAnalyzer(Version.LUCENE_36));
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43,
+                new GermanAnalyzer(Version.LUCENE_43));
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         IndexWriter writer = new IndexWriter(dir, config);
 
@@ -133,49 +127,54 @@ public class AnalyzerTest {
         writer.commit();
         writer.close();
 
-        IndexReader reader = IndexReader.open(dir);
+        IndexReader reader = DirectoryReader.open(dir);
         IndexSearcher searcher = new IndexSearcher(reader);
-        QueryParser parser = new QueryParser(Version.LUCENE_36, "title", 
-					new GermanAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_43, "title",
+                new GermanAnalyzer(Version.LUCENE_43));
         Query query = parser.parse("apache");
 
         TopDocs result = searcher.search(query, 10);
         assertEquals(2, result.totalHits);
 
-        for(ScoreDoc scoreDoc: result.scoreDocs) {
+        for (ScoreDoc scoreDoc : result.scoreDocs) {
             Document doc = searcher.doc(scoreDoc.doc);
             String title = doc.get("title");
-            assertTrue(title.equals("Apache Karaf") 
-			|| title.equals("Integration ganz einfach mit Apache Camel"));
+            assertTrue(title.equals("Apache Karaf")
+                    || title.equals("Integration ganz einfach mit Apache Camel"));
         }
 
 
     }
 
-    private void assertAnalyzed(String text, Analyzer analyzer, String ... expectedTokens) throws IOException {
+    private void assertAnalyzed(String text, Analyzer analyzer, String... expectedTokens) throws IOException {
         Directory dir = new RAMDirectory();
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, analyzer);
         IndexWriter writer = new IndexWriter(dir, config);
 
         Document doc = new Document();
-        doc.add(new Field("name", text, Field.Store.NO, Field.Index.ANALYZED));
+        doc.add(new TextField("name", text, Field.Store.NO));
 
         writer.addDocument(doc);
 
         writer.close();
 
-        IndexReader indexReader = IndexReader.open(dir);
+        IndexReader indexReader = DirectoryReader.open(dir);
 
-        TermEnum terms = indexReader.terms();
+        Fields fields = MultiFields.getFields(indexReader);
 
         int count = 0;
         List<String> expectedTokenList = Arrays.asList(expectedTokens);
 
-        while (terms.next()) {
-            count++;
-            Term term = terms.term();
-            assertTrue(term.text(), expectedTokenList.contains(term.text()));
+        for (String field : fields) {
+            Terms terms = fields.terms(field);
+            TermsEnum termsEnum = terms.iterator(null);
+            BytesRef value;
+            while ((value = termsEnum.next()) != null) {
+                count++;
+                assertTrue(value.utf8ToString(), expectedTokenList.contains(value.utf8ToString()));
+            }
         }
+
         assertEquals(expectedTokens.length, count);
     }
 
@@ -183,7 +182,7 @@ public class AnalyzerTest {
     @Ignore("Doesn't really test anything but was used for inspecting the query")
     public void testQueryStructure() throws ParseException {
         String query = "title:Apache AND speaker:schneyder~ AND date:[20120401 TO 20120430]";
-        QueryParser parser = new QueryParser(Version.LUCENE_36, "content", new GermanAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_43, "content", new GermanAnalyzer(Version.LUCENE_43));
         Query parsed = parser.parse(query);
         System.out.println(parsed.toString());
     }
@@ -191,7 +190,7 @@ public class AnalyzerTest {
     private List<String> getTokens(TokenStream tokenStream) throws IOException {
         CharTermAttribute termAttribute = tokenStream.addAttribute(CharTermAttribute.class);
 
-        List<String> tokens = new ArrayList<String>();
+        List<String> tokens = new ArrayList<>();
 
         while (tokenStream.incrementToken()) {
             tokens.add(termAttribute.toString());
@@ -210,5 +209,4 @@ public class AnalyzerTest {
         }
         return result.toString();
     }
-
 }

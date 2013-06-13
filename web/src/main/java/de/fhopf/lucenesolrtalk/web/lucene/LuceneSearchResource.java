@@ -4,9 +4,7 @@ import com.google.common.base.Optional;
 import com.yammer.metrics.annotation.Timed;
 import de.fhopf.lucenesolrtalk.Result;
 import de.fhopf.lucenesolrtalk.lucene.Searcher;
-import de.fhopf.lucenesolrtalk.web.Categories;
 import de.fhopf.lucenesolrtalk.web.SearchResultView;
-import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.store.FSDirectory;
 
 import javax.ws.rs.GET;
@@ -17,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import org.apache.lucene.queryparser.classic.ParseException;
 
 @Path("/lucene")
 @Produces("text/html; charset=utf-8")
@@ -34,18 +33,16 @@ public class LuceneSearchResource {
 
     @GET
     @Timed
-    public SearchResultView search(@QueryParam("query")Optional<String> query, @QueryParam("sort") Optional<String> sort,
-                                   @QueryParam("category") Optional<String> category) throws ParseException {
+    public SearchResultView search(@QueryParam("query")Optional<String> query, @QueryParam("sort") Optional<String> sort) throws ParseException {
         List<Result> results = Collections.emptyList();
-        List<String> categories = searcher.getAllCategories();
         if (query.isPresent()) {
             if ("date".equals(sort.or(""))) {
-                results = searcher.searchSortedByDate(query.get(), category);
+                results = searcher.searchSortedByDate(query.get());
             } else {
-                results = searcher.search(query.get(), category);
+                results = searcher.search(query.get());
             }
         }
 
-        return new SearchResultView("/lucene/", query.or("-"), results, new Categories(categories, category.or("")));
+        return new SearchResultView("/lucene/", query.or("-"), results, null);
     }
 }
