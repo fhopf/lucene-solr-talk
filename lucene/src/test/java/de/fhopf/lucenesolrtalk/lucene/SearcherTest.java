@@ -76,6 +76,16 @@ public class SearcherTest {
         assertTrue(result.get(0).getExcerpt(), result.get(0).getExcerpt().contains("..."));
     }
 
+    @Test
+    public void phraseQueryOnStemmedTitle() throws ParseException {
+        Talk talk = new Talk("", "Verteiltes Suchen mit Elasticsearch", Collections.<String>emptyList(), new Date(), "", Collections.<String>emptyList(), "");
+        indexer.index(talk);
+
+        // phrase queries do match even though the terms are stemmed
+        List<Result> result = searcher.search("title:\"verteilte suche\"");
+        assertEquals(1, result.size());
+    }
+    
     private Talk newAuthorTalk(String author) {
         return new Talk("", "", Arrays.asList(author), new Date(), "", new ArrayList<String>(), "");
     }

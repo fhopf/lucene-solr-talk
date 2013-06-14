@@ -56,8 +56,8 @@ public class AnalyzerTest {
     private static final Analyzer TOKENIZED_AND_LOWERCASED_AND_STEMMED = new Analyzer() {
         @Override
         protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-            Tokenizer source = new StandardTokenizer(Version.LUCENE_36, reader);
-            TokenStream result = new LowerCaseFilter(Version.LUCENE_36, source);
+            Tokenizer source = new StandardTokenizer(Version.LUCENE_43, reader);
+            TokenStream result = new LowerCaseFilter(Version.LUCENE_43, source);
             result = new GermanNormalizationFilter(result);
             result = new GermanLightStemFilter(result);
             return new TokenStreamComponents(source, result);
@@ -98,6 +98,18 @@ public class AnalyzerTest {
     public void analyzeQueries() throws IOException {
         assertAnalyzed("Verteiltes", TOKENIZED_AND_LOWERCASED_AND_STEMMED, "verteilt");
         assertAnalyzed("Suchen", TOKENIZED_AND_LOWERCASED_AND_STEMMED, "such");
+    }
+    
+    @Test
+    public void analyzeLowercasedForArticle() throws IOException {
+        assertAnalyzed("Die Suche nach der Wahrheit.", TOKENIZED_AND_LOWERCASED, "die", "suche", "nach", "der", "wahrheit");
+        assertAnalyzed("Suchen und Finden", TOKENIZED_AND_LOWERCASED, "suchen", "und", "finden");
+    }
+    
+    @Test
+    public void analyzeStemmedForArticle() throws IOException {
+        assertAnalyzed("Die Suche nach der Wahrheit.", TOKENIZED_AND_LOWERCASED_AND_STEMMED, "die", "such", "nach", "der", "wahrheit");
+        assertAnalyzed("Suchen und Finden", TOKENIZED_AND_LOWERCASED_AND_STEMMED, "such", "und", "find");
     }
 
     @Test

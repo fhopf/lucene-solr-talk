@@ -53,7 +53,7 @@ public class IndexerTest {
     }
 
     private void assertDocumentCount(int amount) throws IOException {
-        IndexReader reader = IndexReader.open(directory);
+        IndexReader reader = DirectoryReader.open(directory);
         assertEquals(amount, reader.numDocs());
         reader.close();
     }
