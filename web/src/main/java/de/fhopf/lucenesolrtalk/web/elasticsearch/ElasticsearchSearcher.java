@@ -69,16 +69,19 @@ public class ElasticsearchSearcher {
         List<Facet> facets = new ArrayList<>();
         DateHistogramFacet dateFacet = response.getFacets().facet(name);
         for (DateHistogramFacet.Entry entry : dateFacet.getEntries()) {
-            DateTime date = new DateTime(entry.getTime());
-            String formattedDate = ISODateTimeFormat.date().print(entry.getTime());
-            // building a range query should be seperated from the term filter queries
-//            StringBuilder fq = new StringBuilder(name);
-//            fq.append(":[");
-//            fq.append(formattedDate);
-//            fq.append(" TO ");
-//            fq.append(formattedDate);
-//            fq.append("||+12M/d]");
-            facets.add(Facet.withFilterQuery(String.valueOf(date.getYear()), entry.getCount(), ""));
+            // luckily we don't have talks on January first ;)
+            DateTime startDate = new DateTime(entry.getTime());
+            DateTime end = new DateTime(entry.getTime()).plusYears(1);
+            String formattedStartDate = ISODateTimeFormat.date().print(startDate);
+            String formattedEndDate = ISODateTimeFormat.date().print(end);
+             //building a range query should be seperated from the term filter queries
+            StringBuilder fq = new StringBuilder(name);
+            fq.append(":[");
+            fq.append(formattedStartDate);
+            fq.append(" TO ");
+            fq.append(formattedEndDate);
+            fq.append("]");
+            facets.add(Facet.withFilterQuery(String.valueOf(startDate.getYear()), entry.getCount(), fq.toString()));
         }
         return facets;
     }

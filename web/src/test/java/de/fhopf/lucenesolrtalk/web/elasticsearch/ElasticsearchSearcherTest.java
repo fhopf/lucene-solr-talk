@@ -8,6 +8,7 @@ import de.fhopf.lucenesolrtalk.web.Facet;
 import de.fhopf.lucenesolrtalk.web.Faceting;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.elasticsearch.action.search.SearchResponse;
@@ -130,6 +131,25 @@ public class ElasticsearchSearcherTest {
         
         response = searcher.search("", Arrays.asList("category:" + talk.categories.get(0)));
         assertEquals(1, response.getHits().getTotalHits());
+    }
+    
+    @Test
+    public void dateRangeQuerying() throws IOException {
+        indexExampleTalk();
+        // retrieve a normal search request to get the facet
+        SearchResponse response = searcher.search("", Collections.<String>emptyList());
+        assertEquals(1, response.getHits().getTotalHits());
+        Faceting facets = searcher.getFacets(response);
+        List<Facet> dateFacets = facets.getDateFacet();
+        // we have a date set so there needs to be a facet
+        assertEquals(1, dateFacets.size());
+        // searching on it with filter should give our result
+        response = searcher.search("", Arrays.asList(dateFacets.get(0).getFq()));
+        assertEquals(1, response.getHits().getTotalHits());
+        // searching for a pre-JUG-year should fail
+        // this sucks because we have the syntax hardcoded in the test
+        response = searcher.search("", Arrays.asList("date:[1983-01-01 TO 1984-01-01]"));
+        assertEquals(0, response.getHits().getTotalHits());
     }
     
     private Result indexAndSearchSingle(String term) throws IOException {
