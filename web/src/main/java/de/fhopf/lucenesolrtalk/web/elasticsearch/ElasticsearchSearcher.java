@@ -31,7 +31,7 @@ import org.elasticsearch.search.highlight.HighlightField;
 public class ElasticsearchSearcher {
 
     private final Client client;
-    static final String INDEX = "bedcon";
+    static final String INDEX = "jug";
 
     public ElasticsearchSearcher(Client client) {
         this.client = client;

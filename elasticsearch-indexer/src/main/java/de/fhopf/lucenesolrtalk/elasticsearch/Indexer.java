@@ -23,7 +23,7 @@ import org.elasticsearch.node.NodeBuilder;
  */
 public class Indexer {
 
-    static final String INDEX = "bedcon";
+    static final String INDEX = "jug";
     static final String TYPE = "talk";
     private final Client client;
 

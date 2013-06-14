@@ -17,7 +17,9 @@ import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.*;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilders;
@@ -26,6 +28,11 @@ import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.junit.Rule;
 
 import static org.junit.Assert.assertEquals;
+import static org.elasticsearch.search.facet.FacetBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.*;
+import org.elasticsearch.search.facet.AbstractFacetBuilder;
+import org.elasticsearch.search.facet.FacetBuilder;
+
 
 /**
  * Execute some core indexing and searching.
@@ -128,7 +135,7 @@ public class CoreTest {
         Client esClient = testNode.getClient();
 
         // use put mapping api to have speaker value keyword-analyzed
-        esClient.admin().indices().prepareCreate("bedcon").addMapping("talk", XContentFactory.jsonBuilder()
+        esClient.admin().indices().prepareCreate("jug").addMapping("talk", XContentFactory.jsonBuilder()
                 .startObject().startObject("talk")
                     .startObject("properties")
                         .startObject("speaker")
@@ -149,20 +156,22 @@ public class CoreTest {
                 .endObject();
 
         IndexRequest request =
-                new IndexRequest("bedcon", "talk")
+                new IndexRequest("jug", "talk")
                 .source(sourceBuilder).refresh(true);
 
         esClient.index(request).actionGet();
         
-        SearchResponse response = esClient.prepareSearch("bedcon")
-                .addFacet(FacetBuilders.termsFacet("speaker").field("speaker"))
-                .setQuery(QueryBuilders.queryString("elasticsearch"))
+        AbstractFacetBuilder facet = termsFacet("speaker").field("speaker");
+        QueryBuilder query = queryString("elasticsearch");
+        SearchResponse response = esClient.prepareSearch("jug")
+                .addFacet(facet)
+                .setQuery(query)
                 .execute().actionGet();
         assertEquals(1, response.getHits().getTotalHits());
         SearchHit hit = response.getHits().getAt(0);
         assertEquals("Verteiltes Suchen mit Elasticsearch", hit.getSource().get("title"));
-        TermsFacet facet = response.facets().facet(TermsFacet.class, "speaker");
-        assertEquals(1, facet.entries().size());
+        TermsFacet resultFacet = response.facets().facet(TermsFacet.class, "speaker");
+        assertEquals(1, resultFacet.entries().size());
         
     }
 
