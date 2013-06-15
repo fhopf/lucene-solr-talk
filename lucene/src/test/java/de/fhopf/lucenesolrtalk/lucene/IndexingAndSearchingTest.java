@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+
 /**
  *
  */
@@ -48,16 +49,38 @@ public class IndexingAndSearchingTest {
     
     @Test
     public void searchSorted() throws IOException, ParseException {
-        Directory directory = indexDocument();
+        Document doc1 = new Document();
+        doc1.add(new TextField("title", "suche suche", Field.Store.YES));
+        doc1.add(new StringField("date", "19830101", Field.Store.NO));
+        Document doc2 = new Document();
+        doc2.add(new TextField("title", "suche banane", Field.Store.YES));
+        doc2.add(new StringField("date", "20130101", Field.Store.NO));
+        
+        Directory directory = indexDocument(doc1, doc2);
         
         IndexReader reader = DirectoryReader.open(directory);
         IndexSearcher searcher = new IndexSearcher(reader);
         QueryParser parser = new QueryParser(Version.LUCENE_43, "title", new GermanAnalyzer(Version.LUCENE_43));
         Query query = parser.parse("suchen");
-        Sort sortByDate = new Sort(new SortField("date", SortField.Type.DOC));
+        Sort sortByDate = new Sort(new SortField("date", SortField.Type.STRING, true));
         TopDocs topDocs = searcher.search(query, 5, sortByDate);
 
-        assertResults(topDocs, searcher);
+        assertEquals(topDocs.totalHits, 2);
+        Document firstResult = searcher.doc(topDocs.scoreDocs[0].doc);
+        Document secondResult = searcher.doc(topDocs.scoreDocs[1].doc);
+        
+        assertEquals("suche banane", firstResult.get("title"));
+        assertEquals("suche suche", secondResult.get("title"));
+        
+        // search again without sort
+        topDocs = searcher.search(query, 5);
+
+        assertEquals(topDocs.totalHits, 2);
+        firstResult = searcher.doc(topDocs.scoreDocs[0].doc);
+        secondResult = searcher.doc(topDocs.scoreDocs[1].doc);
+        
+        assertEquals("suche suche", firstResult.get("title"));
+        assertEquals("suche banane", secondResult.get("title"));
     }
 
     private Directory indexDocument() throws IOException {
@@ -65,14 +88,7 @@ public class IndexingAndSearchingTest {
         doc.add(new TextField("title", "Such Evolution", Field.Store.YES));
         doc.add(new TextField("speaker", "Florian Hopf", Field.Store.YES));
         doc.add(new StringField("date", "20130704", Field.Store.YES));
-        Directory directory = FSDirectory.open(new File("/tmp/talk-index"));
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, new GermanAnalyzer(Version.LUCENE_43));
-        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-        try (IndexWriter writer = new IndexWriter(directory, config)) {
-            writer.addDocument(doc);
-            writer.commit();
-        }
-        return directory;
+        return indexDocument(doc);
     }
 
     private void assertResults(TopDocs topDocs, IndexSearcher searcher) throws IOException {
@@ -82,5 +98,18 @@ public class IndexingAndSearchingTest {
             Document result = searcher.doc(scoreDoc.doc);
             assertEquals("Florian Hopf", result.get("speaker"));
         }
+    }
+
+    private Directory indexDocument(Document... doc) throws IOException {
+        Directory directory = FSDirectory.open(new File("/tmp/talk-index"));
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_43, new GermanAnalyzer(Version.LUCENE_43));
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+        try (IndexWriter writer = new IndexWriter(directory, config)) {
+            for (Document indexDoc: doc) {
+                writer.addDocument(indexDoc);
+            }
+            writer.commit();
+        }
+        return directory;
     }
 }
