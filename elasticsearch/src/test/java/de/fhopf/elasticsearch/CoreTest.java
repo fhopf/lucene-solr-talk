@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -19,10 +20,7 @@ import static org.fest.assertions.api.Assertions.*;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.junit.Rule;
@@ -30,8 +28,6 @@ import org.junit.Rule;
 import static org.junit.Assert.assertEquals;
 import static org.elasticsearch.search.facet.FacetBuilders.*;
 import static org.elasticsearch.index.query.QueryBuilders.*;
-import org.elasticsearch.search.facet.AbstractFacetBuilder;
-import org.elasticsearch.search.facet.FacetBuilder;
 
 
 /**
@@ -72,10 +68,10 @@ public class CoreTest {
         System.out.println(actionGet);
 
         // one facet returned
-        assertThat(actionGet.facets().facets().size()).isEqualTo(1);
+        assertThat(actionGet.getFacets().facets().size()).isEqualTo(1);
 
         // default analyzer
-        TermsFacet facet = actionGet.facets().facet("myTerms");
+        TermsFacet facet = actionGet.getFacets().facet("myTerms");
         assertThat(facet.getTotalCount()).isEqualTo(7);
 
         // Result: seems to be using only lowercasing so let's see if we can switch to german
@@ -133,35 +129,11 @@ public class CoreTest {
     @Test
     public void indexAndSearchTalk() throws IOException {
         Client esClient = testNode.getClient();
+        createIndexAndMapping(esClient);
 
-        // use put mapping api to have speaker value keyword-analyzed
-        esClient.admin().indices().prepareCreate("jug").addMapping("talk", XContentFactory.jsonBuilder()
-                .startObject().startObject("talk")
-                    .startObject("properties")
-                        .startObject("speaker")
-                            .field("type", "string").field("analyzer", "keyword")
-                        .endObject()
-                    .endObject()
-                .endObject().endObject()).execute().actionGet();
+        indexTalk(esClient, "Verteiltes Suchen mit Elasticsearch", "Dr. Halil-Cem Gürsoy");
         
-        XContentBuilder sourceBuilder =
-                XContentFactory.jsonBuilder()
-                .startObject()
-                .field("title",
-                "Verteiltes Suchen mit Elasticsearch")
-                .field("date",
-                new Date())
-                .array("speaker",
-                new String[]{"Dr. Halil-Cem Gürsoy"})
-                .endObject();
-
-        IndexRequest request =
-                new IndexRequest("jug", "talk")
-                .source(sourceBuilder).refresh(true);
-
-        esClient.index(request).actionGet();
-        
-        AbstractFacetBuilder facet = termsFacet("speaker").field("speaker");
+        TermsFacetBuilder facet = termsFacet("speaker").field("speaker");
         QueryBuilder query = queryString("elasticsearch");
         SearchResponse response = esClient.prepareSearch("jug")
                 .addFacet(facet)
@@ -170,11 +142,27 @@ public class CoreTest {
         assertEquals(1, response.getHits().getTotalHits());
         SearchHit hit = response.getHits().getAt(0);
         assertEquals("Verteiltes Suchen mit Elasticsearch", hit.getSource().get("title"));
-        TermsFacet resultFacet = response.facets().facet(TermsFacet.class, "speaker");
-        assertEquals(1, resultFacet.entries().size());
+        TermsFacet resultFacet = response.getFacets().facet(TermsFacet.class, "speaker");
+        assertEquals(1, resultFacet.getEntries().size());
         
     }
 
+    @Test
+    public void indexAndSearchMultiMatchTalk() throws IOException {
+        Client esClient = testNode.getClient();
+        createIndexAndMapping(esClient);
+
+        indexTalk(esClient, "Suchen und Finden mit Lucene und Solr", "Florian Hopf");
+        
+        QueryBuilder multiMatch = multiMatchQuery("Solr", "title", "speakers");
+        SearchResponse response = esClient.prepareSearch("jug")
+                .setQuery(multiMatch)
+                .execute().actionGet();
+        assertEquals(1, response.getHits().getTotalHits());
+        SearchHit hit = response.getHits().getAt(0);
+        assertEquals("Suchen und Finden mit Lucene und Solr", hit.getSource().get("title"));
+    }
+    
     private void index(String id, String field, String value) throws IOException {
         testNode.getClient().prepareIndex(INDEX, TYPE, id)
                 .setSource(jsonBuilder().startObject().field(field, value).endObject()).setRefresh(true)
@@ -185,11 +173,42 @@ public class CoreTest {
     private List<String> getTerms(String index, String field) {
         TermsFacetBuilder builder = new TermsFacetBuilder("myTerms").field(field).allTerms(true);
         SearchResponse actionGet = testNode.getClient().prepareSearch(index).addFacet(builder).setQuery(QueryBuilders.matchAllQuery()).setExplain(true).execute().actionGet();
-        TermsFacet facet = actionGet.facets().facet("myTerms");
+        TermsFacet facet = actionGet.getFacets().facet("myTerms");
         List<String> result = new ArrayList<>();
-        for (TermsFacet.Entry entry : facet.entries()) {
-            result.add(entry.getTerm());
+        for (TermsFacet.Entry entry : facet.getEntries()) {
+            result.add(entry.getTerm().string());
         }
         return result;
+    }
+
+    private void createIndexAndMapping(Client esClient) throws ElasticSearchException, IOException {
+        // use put mapping api to have speaker value keyword-analyzed
+        esClient.admin().indices().prepareCreate("jug").addMapping("talk", XContentFactory.jsonBuilder()
+                .startObject().startObject("talk")
+                    .startObject("properties")
+                        .startObject("speaker")
+                            .field("type", "string").field("analyzer", "keyword")
+                        .endObject()
+                    .endObject()
+                .endObject().endObject()).execute().actionGet();
+    }
+
+    private void indexTalk(Client esClient, String title, String speaker) throws ElasticSearchException, IOException {
+        XContentBuilder sourceBuilder =
+                XContentFactory.jsonBuilder()
+                .startObject()
+                .field("title",
+                title)
+                .field("date",
+                new Date())
+                .array("speaker",
+                new String[]{speaker})
+                .endObject();
+
+        IndexRequest request =
+                new IndexRequest("jug", "talk")
+                .source(sourceBuilder).refresh(true);
+
+        esClient.index(request).actionGet();
     }
 }
