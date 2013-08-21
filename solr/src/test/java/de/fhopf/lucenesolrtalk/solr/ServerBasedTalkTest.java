@@ -44,7 +44,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
 
     private SolrQuery query(String text) {
         SolrQuery query = new SolrQuery(text);
-        return query.setQueryType("/jugka");
+        return query.setRequestHandler("/jugka");
     }
 
     @Test
@@ -117,7 +117,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
         server.commit();
 
         SolrQuery solrQuery = new SolrQuery("apache");
-        solrQuery.setQueryType("/jugka");
+        solrQuery.setRequestHandler("/jugka");
         QueryResponse response = server.query(solrQuery);
         assertEquals(1, response.getResults().size());
         assertEquals("Apache Karaf", response.getResults().get(0).get("title"));

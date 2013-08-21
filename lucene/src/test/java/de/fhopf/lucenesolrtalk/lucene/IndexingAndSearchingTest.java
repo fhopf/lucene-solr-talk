@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
@@ -86,7 +87,7 @@ public class IndexingAndSearchingTest {
     private Directory indexDocument() throws IOException {
         Document doc = new Document();
         doc.add(new TextField("title", "Such Evolution", Field.Store.YES));
-        doc.add(new TextField("speaker", "Florian Hopf", Field.Store.YES));
+        doc.add(new StoredField("speaker", "Florian Hopf"));
         doc.add(new StringField("date", "20130704", Field.Store.YES));
         return indexDocument(doc);
     }
@@ -94,10 +95,9 @@ public class IndexingAndSearchingTest {
     private void assertResults(TopDocs topDocs, IndexSearcher searcher) throws IOException {
         assertEquals(1, topDocs.totalHits);
         
-        for (ScoreDoc scoreDoc: topDocs.scoreDocs) {
-            Document result = searcher.doc(scoreDoc.doc);
-            assertEquals("Florian Hopf", result.get("speaker"));
-        }
+        ScoreDoc scoreDoc = topDocs.scoreDocs[0];
+        Document result = searcher.doc(scoreDoc.doc);
+        assertEquals("Florian Hopf", result.get("speaker"));
     }
 
     private Directory indexDocument(Document... doc) throws IOException {
