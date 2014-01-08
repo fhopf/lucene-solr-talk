@@ -11,8 +11,8 @@ import org.junit.Test;
 public class TalkTest extends SolrTestCaseJ4 {
 
     @BeforeClass
-    public static void initCore() throws Exception {
-        SolrTestCaseJ4.initCore("solrhome/conf/solrconfig.xml", "solrhome/conf/schema.xml", "solrhome/");
+    public static void initSolr() throws Exception {
+        SolrTestCaseJ4.initCore("solrconfig.xml", "schema.xml", "solrhome/");
     }
 
     @Test

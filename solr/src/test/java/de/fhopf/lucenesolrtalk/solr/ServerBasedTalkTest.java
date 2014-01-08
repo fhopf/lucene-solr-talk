@@ -27,8 +27,8 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
     private SolrParams query;
 
     @BeforeClass
-    public static void initCore() throws Exception {
-        SolrTestCaseJ4.initCore("solrhome/conf/solrconfig.xml", "solrhome/conf/schema.xml", "solrhome/");
+    public static void initSolr() throws Exception {
+        SolrTestCaseJ4.initCore("solrconfig.xml", "schema.xml", "solrhome/");
     }
 
     @Before
@@ -104,7 +104,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
         assertNotNull(response.getHighlighting());
         Map<String, List<String>> fragments = response.getHighlighting().get("/tmp/foo");
         assertEquals(1, fragments.size());
-        assertTrue(fragments.get("content").get(0).matches(".*<b style=.*>Hut</b>.*"));
+        assertTrue(fragments.get("content").get(0).matches(".*<em>Hut</em>.*"));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ServerBasedTalkTest extends SolrTestCaseJ4 {
     }
 
     @After
-    public void clearIndex() {
+    public void clearSolr() {
         super.clearIndex();
     }
 }

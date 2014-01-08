@@ -15,7 +15,9 @@ configurations {
 dependencies {
     solrWebApp "org.apache.solr:solr:4.2.0@war"
     testCompile "junit:junit:4.10"
-    testCompile "org.apache.solr:solr-test-framework:4.2.0"
+    testCompile("org.apache.solr:solr-test-framework:4.2.0") {
+        exclude group: "org.restlet.jee"
+    }
 }
 
 // custom task that configures the jetty plugin
