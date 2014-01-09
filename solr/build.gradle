@@ -14,7 +14,7 @@ configurations {
 
 dependencies {
     solrWebApp "org.apache.solr:solr:4.2.0@war"
-    testCompile "junit:junit:4.10"
+    testCompile "junit:junit:4.11"
     testCompile("org.apache.solr:solr-test-framework:4.2.0") {
         exclude group: "org.restlet.jee"
     }
