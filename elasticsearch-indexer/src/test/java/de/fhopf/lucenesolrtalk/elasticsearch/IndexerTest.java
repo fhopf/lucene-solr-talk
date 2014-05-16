@@ -18,7 +18,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 
 /**
  *
@@ -49,14 +48,14 @@ public class IndexerTest {
     public void prepareIndexAndIndex() throws IOException {
 
         prepareIndexAndIndex(talk);
-        assertEquals(1, findAll().hits().totalHits());
+        assertEquals(1, findAll().getHits().totalHits());
     }
 
     @Test
     public void pathIsId() throws IOException {
         prepareIndexAndIndex(talk);
 
-        SearchHit hit = findAll().hits().getAt(0);
+        SearchHit hit = findAll().getHits().getAt(0);
         // path needs to be set as id
         assertEquals(talk.path, hit.getId());
     }
@@ -64,7 +63,7 @@ public class IndexerTest {
     @Test
     public void categoriesAreMultivalued() throws IOException {
         prepareIndexAndIndex(talk);
-        SearchHit hit = findAll().hits().getAt(0);
+        SearchHit hit = findAll().getHits().getAt(0);
         SearchHitField category = hit.field("category");
         assertEquals(talk.categories.size(), category.getValues().size());
     }
@@ -78,7 +77,7 @@ public class IndexerTest {
 
     private boolean indexExists(String name) {
         IndicesAdminClient indicesClient = testNode.getClient().admin().indices();
-        return indicesClient.prepareExists(name).execute().actionGet().exists();
+        return indicesClient.prepareExists(name).execute().actionGet().isExists();
     }
 
     /**
