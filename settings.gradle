@@ -1,1 +1,1 @@
-include 'lucene', 'elasticsearch', 'elasticsearch-junit-rule', 'elasticsearch-indexer', 'solr', 'solr-indexer', 'web'
+include 'lucene', 'elasticsearch', 'elasticsearch-junit-rule', 'elasticsearch-indexer', 'elasticsearch-jest-indexer', 'solr', 'solr-indexer', 'web'

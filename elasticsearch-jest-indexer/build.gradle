@@ -1,0 +1,30 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+
+dependencies {
+    compile(project(":lucene")) {
+        exclude group: 'org.apache.lucene'
+        exclude group: 'org.apache.tika'
+    }
+    compile group: 'io.searchbox', name: 'jest', version: '0.1.1'
+    //compile group: 'org.elasticsearch', name: 'elasticsearch', version: '1.0.0'
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "de.fhopf.lucenesolrtalk.jest.Indexer")
+    }
+}
+
+task index(type: JavaExec) {
+    main = 'de.fhopf.lucenesolrtalk.jest.Indexer'
+    classpath = sourceSets.main.runtimeClasspath
+    args = ['../lucene/data/properties/', 'http://localhost:9200']
+    //debug = true
+}
