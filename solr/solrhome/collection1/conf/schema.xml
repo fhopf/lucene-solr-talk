@@ -18,6 +18,12 @@
     <!-- A specialized field for geospatial search. If indexed, this fieldType must not be multivalued. -->
     <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
 
+    <fieldType name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType"
+               distErrPct="0.025"
+               maxDistErr="0.000009"
+               units="degrees"
+            />
+    
     <!-- The StrField type is not analyzed, but indexed/stored verbatim. -->
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
 
@@ -53,8 +59,8 @@
 	multiValued="true"/>
    <field name="content" type="text_de" indexed="true" stored="true"/>
    <field name="organizer" type="string" indexed="true" stored="true"/>
-   <field name="location" type="location" indexed="true" stored="true"/>
-   <dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false"/>
+   <field name="location" type="location_rpt" indexed="true" stored="true"/>
+   <!--<dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false"/>-->
  </fields>
 
  <uniqueKey>path</uniqueKey>
